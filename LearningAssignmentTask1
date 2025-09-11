@@ -1,1 +1,25 @@
-def is_min_ratio_toilets_to_people_met("xt/yp")
+
+
+
+def is_population_disabled(disabled:float, total_population:float):
+    if disabled/total_population < 0.1:
+        return False
+    elif disabled/total_population >= 0.1:
+        return True
+
+print(is_population_disabled(disabled= 0, total_population=32))
+print(is_population_disabled(disabled=52, total_population=392))
+
+def is_gp_religious_or_academic(gp:str):
+    gp_set = set(['Faculty', 'Mosque', 'Church', 'School', 'Institute', 'Education'])
+    
+    if 'Mosque' or 'Church' in gp_set:
+        return True
+    elif 'School' or 'Institute' or 'Education' or 'Faculty' in gp_set:
+        return True
+    else:
+        return False
+
+print(is_gp_religious_or_academic('Faculty of Earth Sciences and Mining'))
+print(is_gp_religious_or_academic('Almorada Church'))
+print(is_gp_religious_or_academic('Health Insulation Building'))
