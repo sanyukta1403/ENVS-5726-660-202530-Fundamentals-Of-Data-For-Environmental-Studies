@@ -1,1 +1,33 @@
+green_bool = "Greenfield".startswith("Green")
+print(green_bool)
 
+equal_bool = 5 == 5 
+print(equal_bool)
+
+not_equal_bool = 5 != 4
+print(not_equal_bool)
+
+less_than_bool = 5 < 4
+print (less_than_bool)
+
+greater_than_bool = 5 > 3
+print(greater_than_bool)
+
+less_or_equal_bool_1 = 5 <= 3
+less_or_equal_bool_2 = 5 <= 5
+print(less_or_equal_bool_1)
+print(less_or_equal_bool_2)
+
+greater_or_equal_bool_1 = 5 >= 7
+greater_or_equal_bool_2 = 5 >= 2
+print(greater_or_equal_bool_1)
+print(greater_or_equal_bool_2)
+
+less_than_bool = len("hello sisters") < len("hello sister")
+print(less_than_bool)
+
+general_motors_risk_rating = 27.6
+general_motors_emissions_ambitions = "Yes, Meets All Criteria"
+
+is_general_motors_sustainable = general_motors_risk_rating< 25 and general_motors_emissions_ambitions == "Yes, Meets All Criteria"
+print(is_general_motors_sustainable)

@@ -1,1 +1,32 @@
+if True:
+    print('This will print')
 
+if False:
+    print('This will not print')
+
+p_value = 0.04
+if p_value < 0.05: 
+    print('Our results are significant')
+
+p_value = 0.1
+if p_value < 0.05: 
+    print('Our results are significant')
+
+if False:
+    print('This will print')
+else:
+    print('but this will print')
+
+p_value = 0.1
+if p_value < 0.05:
+    print("Our results are significant")
+else:
+    print("Our results are not significant")
+
+traffic_light = "Red"
+if traffic_light == "Green":
+    print('Go')
+if traffic_light == "Red":
+    print('Stop')
+else:
+    print('Yield')

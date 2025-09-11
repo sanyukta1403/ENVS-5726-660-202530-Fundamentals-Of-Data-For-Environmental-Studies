@@ -1,1 +1,70 @@
+def get_wind_turbine_wtp_livestock_farm(income, employment, education, health, workmen, landscape_and_agro):
+    if income == 'YES':
+        if employment == 1:
+            return 80
+        if employment == 2:
+            return 100
+        if employment == 3:
+            return 100
+        else:
+            return 100
+    elif income == 'NO':
+        if education == 1:
+            return 50
+        if education == 2:
+            if health == "YES":
+                return 50
+            elif health == "NO":
+                if employment == 1:
+                    return 70
+                elif employment == 2:
+                    return 60
+                elif employment == 3:
+                    return 50
+                else:
+                    return 60
+        if education == 3:
+            if health == "YES":
+                return 50
+            elif health == "NO":
+                if employment == 1:
+                    return 60
+                elif employment == 2: 
+                    return 50
+                elif employment == 3:
+                    return 60
+                else:
+                    return 60
+        if education == 4:
+            if workmen == "YES":
+                return 40
+            elif workmen == "NO":
+                if landscape_and_agro == "YES":
+                    return 60
+                elif landscape_and_agro == "NO":
+                    return 70
+                else:
+                    return 60
+        else:
+            return 60
+    else:
+        return 60
 
+wtp = get_wind_turbine_wtp_livestock_farm(
+    income = 'NO',
+    employment = 2,
+    education = 4,
+    health = "YES",
+    workmen = "NO",
+    landscape_and_agro = "NO")
+print (wtp)
+
+wtp = get_wind_turbine_wtp_livestock_farm(
+    income = "YES",
+    employment= 3,
+    education= 1,
+    health= "YES",
+    workmen= "NO",
+    landscape_and_agro= "NO")
+print(wtp)
+    
