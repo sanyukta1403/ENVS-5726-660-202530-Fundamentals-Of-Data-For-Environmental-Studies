@@ -1,0 +1,26 @@
+#for loop will run all the code within the for loop (indented after the colon) multiple times
+#The number of times the loop runs = number of elements in the collection
+
+collection = [1,2,3]
+
+for variable in collection: 
+    print(variable)
+
+tree_list = ['Honey Maple', 'Oak', 'Pine', 'Willow']
+for tree in tree_list:
+    print(tree)
+for index, tree in enumerate(tree_list): #use enumerate to index the collection
+    print(f'{index}: {tree}') #f tells Python: this string may contain placeholders { } that should be replaced with actual values
+
+dna_list = ['CATGCG', 'TAG', 'TGCCATGC', 'GGTCA'] #[] create lists + indexing + slicing () create tuples + call functions
+for dna_sequence in dna_list:
+    print(len(dna_sequence)) #len(String) for each string in a list of strings, we can print out the lengths of each string
+
+#to store the values of a calculation create a new list and populate (ammend) with calculated values 
+dna_list = ['CATGCG', 'TAG', 'TGCCATGC', 'GGTCA']
+dna_length_list = []
+
+for dna_sequence in dna_list:
+    dna_length_list.append(len(dna_sequence)) #append each calculated result into new list
+
+print(dna_length_list)

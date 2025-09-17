@@ -1,0 +1,31 @@
+import math #numerical collection calculation 
+number_list = [2, 4, 5, 10]
+squared_number_list = []
+
+for number in number_list:
+    squared_number= int(math.pow(number, 2))
+    squared_number_list.append(squared_number)
+print(squared_number_list)
+
+#Boolean Conditional Collection Calculation – For each pipe lead%, get True if Lead % < 0.25 and False if not
+pipe_lead_percentage_list = [0,11, 0.35, 0.13, 0.43, 0.87]
+lead_free_bool_list = []
+
+for pipe_lead_percentage in pipe_lead_percentage_list:
+    if pipe_lead_percentage < 0.25:
+        lead_free_bool_list.append(True) #append dif values based on collection
+    else:
+        lead_free_bool_list.append(False)
+print(lead_free_bool_list)
+
+#Set Collection Calculation – For Each Address, Get Unique Cities
+address_list = ['3451 Walnut Street, Philadelphia, PA 19104',
+                '1801 N. Broad St, Philadelphia, PA 19122,'
+                '201 Old Main, University Park, PA 6802',
+                '3141 Chestnut Street, Philadelphia, PA 19104']
+city_set = set() #adding calculated results in a set gives unique values
+for address in address_list:
+    street, city, state_zip = address.split(', ')
+    city_set.add(city)
+print(city_set)
+
