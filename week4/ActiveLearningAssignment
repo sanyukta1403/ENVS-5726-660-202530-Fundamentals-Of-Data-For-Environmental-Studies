@@ -1,0 +1,26 @@
+from pathlib import Path
+import csv
+import os 
+
+folder_path = '/Users/sanyuktasingh/Desktop/data class/SEC 10K'
+filenames = [os.path.join(folder_path, file) for file in os.listdir(folder_path)] #to get all the files in the folder
+
+
+ticker_to_name = {          #convert ticker symbol to company names 
+    "amzn": "Amazon.com, Inc",
+    "goog": "Google.com, Inc",
+    "msft": "Microsoft Corporation",
+    "aapl": "Apple Inc.",
+    "nvda": "NVIDIA Corporation"
+}
+
+headers = ['Company Name', 'Year', 'Count Sustainability', 'Count AI'] #creating table with company names as headers 
+table = [headers]
+
+#using for to loop through each file in the folder 
+for filepath in filenames:
+    filename = filename.split('/')[-1] #to get the last part of the filepath ex: amzn-20151231.html
+    ticker = filename.split("-")[0].lower() #we split it and then take the first part (amzn) and ensure it is only in lower case so 'AMZN' or 'AmZn' both become 'amzn'
+    
+
+

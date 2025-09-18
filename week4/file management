@@ -1,0 +1,42 @@
+from pathlib import Path
+import csv
+
+csv_path = Path("/Users/sanyuktasingh/Desktop/data class/Haiti_Earthquake_Damage_Assessment.csv")
+haiti_earthquake_table = []
+
+with open(csv_path, 'r', encoding="utf-8") as csv_file:
+    reader = csv.reader(csv_file)
+    for row in reader:
+        haiti_earthquake_table.append(row)
+
+for row in haiti_earthquake_table:
+    print(row) 
+
+#by appending each row into an empty list, we can store the entire table in python
+
+#separating headers from rows 
+
+with open(csv_path, 'r', encoding="utf-8") as csv_file:
+    reader = csv.reader(csv_file)
+
+    headers = next(reader) #next skips the first element so it skips the headers 
+
+    for row in reader:  #using for loop after using means no headers in the iteration 
+        haiti_earthquake_table.append(row)
+
+print('These are the headers:') #this is just a string that helps explain what is coming next
+print(headers)
+
+print('These are the rows:')
+print(row)
+
+number_of_rows = len(haiti_earthquake_table) #gives number of rows 
+print(f'There are {number_of_rows} rows in {csv_path.stem}') 
+
+number_of_columns = len(headers) #gives number of columns 
+print(f'There are {number_of_columns} columns in {csv_path.stem}')
+
+damaged_buildings_column = []
+for row in haiti_earthquake_table:
+    damaged_buildings_column.append(row[headers.index('Damaged Buildings')]) #headers.index to index a row by column name
+print(damaged_buildings_column)

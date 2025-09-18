@@ -1,0 +1,16 @@
+from pathlib import Path
+import csv
+
+csv_path = Path('/Users/sanyuktasingh/Desktop/data class/Solarize Philly Cost Benefit Analysis.csv')
+solarize_cba_table = []
+
+with open(csv_path, 'r', encoding='utf-8') as csv_file:
+    reader = csv.reader(csv_file)
+    solarize_cba_headers = next(reader)
+    for row in reader:
+        solarize_cba_table.append(row)
+
+print(solarize_cba_headers)
+for row in solarize_cba_headers[:10]:
+    print(row)
+
