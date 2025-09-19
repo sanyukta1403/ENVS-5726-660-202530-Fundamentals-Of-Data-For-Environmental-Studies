@@ -24,3 +24,13 @@ for dna_sequence in dna_list:
     dna_length_list.append(len(dna_sequence)) #append each calculated result into new list
 
 print(dna_length_list)
+
+#Practice Examples
+
+exam_scores = [92, 67, 45, 88, 73]
+exam_results = ['Pass' if exam_scores_results > 80 else 'Retake' for exam_scores_results in exam_scores]
+print(exam_results)
+
+temperatures = [32, 50, 78, 90, 60]
+temperature_labels = ['Cold' if t < 60 else 'Warm' if t <= 85 else 'Hot' for t in temperatures] #why did elif before warm cause an error?
+print(temperature_labels)

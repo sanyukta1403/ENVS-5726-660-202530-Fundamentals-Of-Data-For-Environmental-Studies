@@ -43,7 +43,6 @@ def is_gp_religious_or_academic(gp):
         return False #can also write as return bool(intersection_a_keywords)
 
 
-
 print(is_gp_religious_or_academic(gp='Faculty of Earth Sciences and Mining')) # what's in the () in def is in the () in print 
 print(is_gp_religious_or_academic(gp='Almorada Church')) #so it calls to the same thing that's how gp could split without typ[ing all the words
 print(is_gp_religious_or_academic('Health Insulation Building'))

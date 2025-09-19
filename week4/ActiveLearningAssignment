@@ -1,26 +1,30 @@
 from pathlib import Path
 import csv
-import os 
+from datetime import datetime
 
-folder_path = '/Users/sanyuktasingh/Desktop/data class/SEC 10K'
-filenames = [os.path.join(folder_path, file) for file in os.listdir(folder_path)] #to get all the files in the folder
+my_folder = Path('/Users/sanyuktasingh/Desktop/data class/SEC 10K')
 
+headers = ['Company Name', 'Year', 'Count Sustainability', 'Count AI']
+table = []
 
-ticker_to_name = {          #convert ticker symbol to company names 
-    "amzn": "Amazon.com, Inc",
-    "goog": "Google.com, Inc",
-    "msft": "Microsoft Corporation",
-    "aapl": "Apple Inc.",
-    "nvda": "NVIDIA Corporation"
-}
-
-headers = ['Company Name', 'Year', 'Count Sustainability', 'Count AI'] #creating table with company names as headers 
-table = [headers]
-
-#using for to loop through each file in the folder 
-for filepath in filenames:
-    filename = filename.split('/')[-1] #to get the last part of the filepath ex: amzn-20151231.html
-    ticker = filename.split("-")[0].lower() #we split it and then take the first part (amzn) and ensure it is only in lower case so 'AMZN' or 'AmZn' both become 'amzn'
+for my_file in my_folder.glob('*'):
+    name_split = my_file.name.split('-')[0].lower() #take the first part of the name and 'lower' makes it case insensitive 
     
+    company_name = name_split.replace('amzn', 'Amazon').replace('msft', 'Microsoft').replace('goog', 'Google').replace('nvda', 'Nvidea') #replaced shorthands for full name
+    
+    date_string = my_file.name.split('-')[-1].split('.')[0].split('_')[-1] #removed other variables to keep just the date
+    my_dates = datetime.strptime(date_string, '%Y%m%d') #converted the date which is in a string to datetime
+    year = my_dates.year
+
+    with open(my_file, 'r', encoding='cp1252') as file: #encoding='utf-8' doesnt include all the characters so we used a different encoding
+        content = file.read()
+        sustainability_counter = content.lower().count('sustainability') #we dont use len here because it counts each each letter in the word
+        ai_counter = content.lower().count('artificial intelligence')
+
+    table.append([company_name, my_dates.year, sustainability_counter, ai_counter])
+
+print(headers) #so that headers are seperate and not part of the analysis because they don't contain the actual data
+for row in sorted(table)[:10]: #did sorted to ensure the order is correct + ':' means starting at the beginning and ending at 10th row
+    print(row)
 
 

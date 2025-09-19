@@ -1,0 +1,34 @@
+from pathlib import Path
+import csv
+import os 
+
+folder_path = '/Users/sanyuktasingh/Desktop/data class/SEC 10K'
+filenames = [os.path.join(folder_path, file) for file in os.listdir(folder_path)] #to get all the files in the folder
+
+
+ticker_to_name = filenames.replace('amzn' , 'Amazon')
+
+headers = ['Company Name', 'Year', 'Count Sustainability', 'Count AI'] #creating table with company names as headers 
+table = [headers]
+
+#using for to loop through each file in the folder 
+for filepath in filenames:
+    filename = filename.split('/')[-1] #to get the last part of the filepath ex: amzn-20151231.html
+    ticker = filename.split("-")[0].lower() #we split it and then take the first part (amzn) and ensure it is only in lower case so 'AMZN' or 'AmZn' both become 'amzn'
+    if ticker in ticker_to_name:
+        company_name= ticker_to_name[ticker]
+    else:
+        company_name=ticker_to_name() #If the ticker is in the dictionary, we use the full company name; If it’s not there, we just use the ticker in uppercase (so the code won’t break)
+
+numbers = ""
+for character in filename:
+    if character.isdigit():       # check if it is a number
+        numbers = numbers + character   # add it to the string of numbers
+if numbers != "":
+    year = numbers[0:4]   # take the first 4 digits as the year
+else:
+    year = "Unknown"
+
+
+
+
