@@ -9,12 +9,14 @@ headers = ['Company Name', 'Year', 'Count Sustainability', 'Count AI']
 table = []
 
 for my_file in my_folder.glob('*'):
+    if my_file.name == ".DS_Store":  #exception to ignore .DS_Store file since it is internal to mac systems and cannot be parsed
+        continue
     name_split = my_file.name.split('-')[0].lower() #take the first part of the name and 'lower' makes it case insensitive 
     
     company_name = name_split.replace('amzn', 'Amazon').replace('msft', 'Microsoft').replace('goog', 'Google').replace('nvda', 'NVIDIA') #replaced shorthands for full name
     
     date_string = my_file.name.split('-')[-1].split('.')[0].split('_')[-1] #removed other variables to keep just the date
-    my_dates = datetime.strptime(date_string, '%Y%m%d') #converted the date which is in a string to datetime
+    my_dates = datetime.strptime(date_string, "%Y%m%d") #converted the date which is in a string to datetime
     year = my_dates.year
 
     with open(my_file, 'r', encoding='cp1252') as file: #encoding='utf-8' doesnt include all the characters so we used a different encoding
@@ -28,17 +30,64 @@ print(headers) #so that headers are seperate and not part of the analysis becaus
 for row in sorted(table)[:10]: #did sorted to ensure the order is correct + ':' means starting at the beginning and ending at 10th row
     print(row)
 
-def get_average_by_company(headers, table, column_name_to_average, company_name):
-    find_company_column = headers.index('Company Name')
-    find_target_column = headers.index(column_name_to_average)
+#TASK 2
 
-    values_specific_columns = [float(row[find_target_column]) for row in table if row[find_company_column] == company_name]
-    return statistics.mean(values_specific_columns)
+def get_average_by_company(headers, table, column_name_to_average, company_name): #defined function with 4 inputs
+    find_company_column = headers.index('Company Name') #we used index to identify the column that has our company names
+    find_target_column = headers.index(column_name_to_average) #specifying the column name that we want to average and this is defined later in the code and we do this so that we dont have to write names of each column separately which is tedious
 
-for company_name in ['NVIDIA', 'Microsoft', 'Google', 'Amazon']:
-    for column_name_to_average in ['Count Sustainability', 'Count AI']:
+    values_specific_columns = [float(row[find_target_column]) for row in table if row[find_company_column] == company_name] #find the target column and ensure the row is a float, got to the row and if the row matches the company name then we proceed with our next average function
+    return statistics.mean(values_specific_columns) #calculate mean for the values in target column
+
+for company_name in ['NVIDIA', 'Microsoft', 'Google', 'Amazon']: #for loop that lists company names
+    for column_name_to_average in ['Count Sustainability', 'Count AI']: #this lists both column names and later the print will then run both of these subsequently
         column_average = get_average_by_company(headers = headers,
                                                 table= table,
                                                 column_name_to_average=column_name_to_average,
-                                                company_name= company_name)
-        print(f'The average {column_name_to_average} for {company_name} is {column_average}')
+                                                company_name= company_name) #we run our average function and we are defining our inputs 
+        print(f'The average {column_name_to_average} for {company_name} is {column_average}') #column name to average is our target column we want to calculate for, column_average is our calculated values that it prints for each company in the order that we defined it
+
+
+#TASK3
+
+amazon_table = []
+google_table = []
+nvidia_table = []
+msft_table = []
+
+for row in table:
+    if row[headers.index('Company Name')] == 'Amazon':
+        amazon_table.append(row)
+    elif row[headers.index('Company Name')] == 'Google':
+        google_table.append(row)
+    elif row[headers.index('Company Name')] == 'NVIDIA':
+        nvidia_table.append(row)
+    elif row[headers.index('Company Name')] == 'Microsoft':
+        msft_table.append(row)
+
+print(amazon_table)
+print(google_table)
+print(nvidia_table)
+print(msft_table)
+
+output_folder = Path('/Users/sanyuktasingh/Desktop/data class/SEC 10K')
+
+with open(output_folder / 'SEC_10K_Amazon_Metrics.csv', 'w', newline='', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerow(headers)
+    writer.writerows(amazon_table)
+
+with open(output_folder / 'SEC_10K_Google_Metrics.csv', 'w', newline='', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerow(headers)
+    writer.writerows(google_table)
+
+with open(output_folder / 'SEC_10K_NVIDIA_Metrics.csv', 'w', newline='', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerow(headers)
+    writer.writerows(nvidia_table)
+
+with open(output_folder / 'SEC_10K_Microsoft_Metrics.csv', 'w', newline='', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerow(headers)
+    writer.writerows(msft_table)
