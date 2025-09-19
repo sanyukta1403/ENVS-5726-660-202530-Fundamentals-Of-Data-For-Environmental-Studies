@@ -1,6 +1,7 @@
 from pathlib import Path
 import csv
 from datetime import datetime
+import statistics
 
 my_folder = Path('/Users/sanyuktasingh/Desktop/data class/SEC 10K')
 
@@ -10,7 +11,7 @@ table = []
 for my_file in my_folder.glob('*'):
     name_split = my_file.name.split('-')[0].lower() #take the first part of the name and 'lower' makes it case insensitive 
     
-    company_name = name_split.replace('amzn', 'Amazon').replace('msft', 'Microsoft').replace('goog', 'Google').replace('nvda', 'Nvidea') #replaced shorthands for full name
+    company_name = name_split.replace('amzn', 'Amazon').replace('msft', 'Microsoft').replace('goog', 'Google').replace('nvda', 'NVIDIA') #replaced shorthands for full name
     
     date_string = my_file.name.split('-')[-1].split('.')[0].split('_')[-1] #removed other variables to keep just the date
     my_dates = datetime.strptime(date_string, '%Y%m%d') #converted the date which is in a string to datetime
@@ -27,4 +28,17 @@ print(headers) #so that headers are seperate and not part of the analysis becaus
 for row in sorted(table)[:10]: #did sorted to ensure the order is correct + ':' means starting at the beginning and ending at 10th row
     print(row)
 
+def get_average_by_company(headers, table, column_name_to_average, company_name):
+    find_company_column = headers.index('Company Name')
+    find_target_column = headers.index(column_name_to_average)
 
+    values_specific_columns = [float(row[find_target_column]) for row in table if row[find_company_column] == company_name]
+    return statistics.mean(values_specific_columns)
+
+for company_name in ['NVIDIA', 'Microsoft', 'Google', 'Amazon']:
+    for column_name_to_average in ['Count Sustainability', 'Count AI']:
+        column_average = get_average_by_company(headers = headers,
+                                                table= table,
+                                                column_name_to_average=column_name_to_average,
+                                                company_name= company_name)
+        print(f'The average {column_name_to_average} for {company_name} is {column_average}')
