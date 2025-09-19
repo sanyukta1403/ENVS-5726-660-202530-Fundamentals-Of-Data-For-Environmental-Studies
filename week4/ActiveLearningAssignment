@@ -8,13 +8,13 @@ my_folder = Path('/Users/sanyuktasingh/Desktop/data class/SEC 10K')
 headers = ['Company Name', 'Year', 'Count Sustainability', 'Count AI']
 table = []
 
-for my_file in my_folder.glob('*'):
-    if my_file.name == ".DS_Store":  #exception to ignore .DS_Store file since it is internal to mac systems and cannot be parsed
-        continue
+for my_file in my_folder.glob('*'): #after * write .html so it only recognizes those files (then we dont need to write below debug code)
+    if my_file.name == ".DS_Store" or my_file.suffix == ".csv": 
+        continue  #exception to ignore .DS_Store file since it is internal to mac systems and cannot be parsed
     name_split = my_file.name.split('-')[0].lower() #take the first part of the name and 'lower' makes it case insensitive 
     
     company_name = name_split.replace('amzn', 'Amazon').replace('msft', 'Microsoft').replace('goog', 'Google').replace('nvda', 'NVIDIA') #replaced shorthands for full name
-    
+    print(my_file.name)
     date_string = my_file.name.split('-')[-1].split('.')[0].split('_')[-1] #removed other variables to keep just the date
     my_dates = datetime.strptime(date_string, "%Y%m%d") #converted the date which is in a string to datetime
     year = my_dates.year
