@@ -1,0 +1,42 @@
+#Practice 1 
+
+#Create a Python dictionary called student_grades with the following student names as keys and their grades as values: Alice (85), Bob (90), and Chandra (78). Then, update Bob’s grade to 95. What does the dictionary look like after this update?
+
+student_grades = {'Alice':85, 'Bob':90, 'Chandra':78}
+student_grades['Bob'] = 95
+student_grades['Sierra'] = 70
+print(student_grades)
+
+#If the key already exists, dict[key] = value updates it
+# If the key does not exist, dict[key] = value creates it
+
+#Practice 2
+
+#for the dict below use appropriate dictionary methods to:
+#1. List all the cities (keys) in the dictionary.
+#2. List all the populations (values).
+#3. Check if the city "Miami" exists in the dictionary
+
+city_population = {
+    "Denver": 727211,
+    "Seattle": 744955,
+    "Austin": 964254
+}
+
+print(city_population.keys()) #instead of the long way of creating a new collection of keys then printing it we can just use the function in the print command
+print(city_population.values())
+print('Miami' in city_population)
+
+#Practice 3 
+
+#Write a Python script that takes the string "banana" and uses a dictionary to count how many times each character appears in the string. What is the resulting dictionary?
+
+my_string = 'banana'
+count_dict = {}
+
+for char in my_string:
+    if char not in count_dict: #we say in count dict not my string cause every char we loop over is always in my_string; this lets us check if this is the first time we’ve seen that character.
+        count_dict[char] = 1 #count_dict starts empty {} and grows as we count
+    else:
+        count_dict[char] = count_dict[char] + 1
+print(count_dict)

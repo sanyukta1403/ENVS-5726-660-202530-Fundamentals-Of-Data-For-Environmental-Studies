@@ -1,0 +1,54 @@
+my_dict = {} # {} creates a dictionary 
+my_dict['key1'] = 5
+my_dict['key2'] = 10
+my_dict['key2'] = 15 #keys have to be unique values so giving a new value to the same key updates it
+print(my_dict)
+
+list_of_keys = list(my_dict.keys()) #dict.keys gives collection of all keys; have to convert to a list to make it usable 
+print(list_of_keys)
+
+values_in_keys = list(my_dict.values()) #dict.values gives all values in the keys 
+print(values_in_keys)
+
+my_dictionary = {'key1': 5, 'key2' : 10}
+if 'key1' in my_dictionary:
+    print('Key 1 is a key in my dictionary')
+if 'key' in my_dictionary:  #can't write elif cause if one if/elif is true python skips the other elif/else; each if is checked independently
+    print('Key 3 is a key in my dictionary') 
+else:
+    print('Key 3 is NOT a key in my dictionary')
+
+from pprint import pprint
+#Printing a dictionary will show all the contents of the dictionary, but it will print everything on one line; pprint is a function that allows you to pretty-print formatted dictionaries 
+haiti_earthquake_table = [
+    ['Aquin', 4],
+    ['Camp-Perrin', 60],
+    ['Cavaillon',3],
+    ['Les Cayes', 147]] #we have created a list of lists
+
+haiti_earthquake_table_dict = {}
+for row in haiti_earthquake_table:
+     commune = row[0]
+     damaged_buildings = row[1]
+     haiti_earthquake_table_dict[commune] = damaged_buildings #for each row assign commune as the key and damaged buildings as the value in the dictionary 
+print(haiti_earthquake_table_dict)
+
+#Iterations that are used to create new collections can be expressed as comprehensions. Just as we can create new lists using listcomprehensions, we can also create new dictionaries using dictionary comprehensions
+
+#the above code can be accomplished with a single line using a dictionary comprehension
+#when we populate elements in a dictionary comprehension, we must first define our key-value pairs separated by colon ex: row[0]:row[1] then the for loop
+haiti_earthquake_table_dict = {row[0]:row[1] for row in haiti_earthquake_table}
+print(haiti_earthquake_table_dict) 
+
+#Count the Number of Each Unique Character in a String
+#we can create a dictionary where each key is each unique character, and each value is the count of the respective character in the string
+my_string = 'aaabbaacddd'
+count_dict = {}
+
+for char in my_string: #iterate every character in my string 
+    if char not in count_dict:
+        count_dict[char] = 1 #if char not in list then create new key-value pair where count value is 1; 
+        #When we first loop over the string, we don’t have any counts yet — our dictionary starts as empty that's why we need the if check; If it’s the first time we see "a", we create it with value 1; if we’ve already seen "a", then we just add +1.
+    else: #If the character is already a key in the dict, increment the existing count value by 1
+        count_dict[char] = count_dict[char] + 1
+print(count_dict)

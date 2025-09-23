@@ -1,0 +1,18 @@
+Uses of the different brackets:
+
+Parentheses ()
+    1. Function calls: ex print(), len()
+    2. Defining functions: def xyz()
+    3. Tuples: t=(1,2,3) 
+        tuples are different from lists in that they cannot be changed once created; you use them when you want data to stay fixed or represent a single "record" ex: storing coordinates (x, y), or database rows
+    4. Grouping expressions: result = (2 + 3) * 4 
+
+Square brackets []
+    1. Lists ex: [10,20,30]
+    2. Indexing and slicing ex: my_list[0] will give 10 and my_list[1:3] will give [20,30]
+    3. List comprehensions 
+
+Curly braces {}
+    1. Dictionaries 
+    2. Sets 
+    3. Dictionary comprehensions
