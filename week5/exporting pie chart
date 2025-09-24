@@ -1,0 +1,35 @@
+from pathlib import Path
+import csv
+
+csv_path = Path('/Users/sanyuktasingh/Desktop/data class/Haiti Disaster Deaths by Year.csv')
+
+totaldeaths_for_disastertype_dict = {}
+with open(csv_path, 'r', encoding='cp1252') as csv_file:
+    reader = csv.reader(csv_file)
+    headers = next(reader)
+
+    for row in reader:
+        country, year, disaster_subgroup, disaster_type, total_deaths, no_injured, total_affected = row 
+
+        if not total_deaths:
+            total_deaths = 0
+        else:
+            total_deaths = int(total_deaths.replace(',', ''))
+        
+        if disaster_type not in totaldeaths_for_disastertype_dict:
+            totaldeaths_for_disastertype_dict[disaster_type] = [total_deaths]
+        else:
+            totaldeaths_for_disastertype_dict[disaster_type].append(total_deaths)
+
+summary_headers = ['Disaster Type', 'Total Deaths']
+summary_table = []
+
+for disaster_type in totaldeaths_for_disastertype_dict:
+    total_deaths_by_disaster_list = totaldeaths_for_disastertype_dict[disaster_type]
+    total_deaths_for_type = sum(total_deaths_by_disaster_list)
+    summary_table.append([disaster_type, total_deaths_for_type])
+
+output_path = Path('/Users/sanyuktasingh/Desktop/data class/Haiti Disaster Deaths by Year.csv')
+with open(output_path, 'w', newline="", encoding='cp1252') as f:
+    writer = csv.writer(f) 
+    writer.writerows([summary_headers]+summary_table) 

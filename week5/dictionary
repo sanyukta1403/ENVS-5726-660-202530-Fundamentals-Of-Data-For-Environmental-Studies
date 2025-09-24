@@ -51,4 +51,4 @@ for char in my_string: #iterate every character in my string
         #When we first loop over the string, we don’t have any counts yet — our dictionary starts as empty that's why we need the if check; If it’s the first time we see "a", we create it with value 1; if we’ve already seen "a", then we just add +1.
     else: #If the character is already a key in the dict, increment the existing count value by 1
         count_dict[char] = count_dict[char] + 1
-print(count_dict)
+print(count_dict) 
