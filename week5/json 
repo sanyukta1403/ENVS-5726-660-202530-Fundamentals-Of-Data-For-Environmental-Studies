@@ -1,0 +1,10 @@
+from pathlib import Path
+import json
+
+json_path = Path('/Users/sanyuktasingh/Desktop/data class/Week 05 Tutorial Data.json')
+
+with open(json_path) as f:
+    data = json.load(f)
+
+#print(data)
+print(data[0]['id'])

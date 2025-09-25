@@ -1,0 +1,35 @@
+from pathlib import Path
+import csv
+import datetime
+import statistics
+
+csv_path = Path('/Users/sanyuktasingh/Desktop/data class/Philadelphia PM2.5 2019.csv')
+
+pmvalue_monthly_dict = {}
+
+with open(csv_path, 'r', encoding='cp1252') as csv_file:
+    reader = csv.reader(csv_file)
+    headers = next(reader)
+
+    for row in reader:
+        year, date_string, statefips, countyfips, ctfips, latitude, longitude, mean_pm25, std_pm25 = row 
+
+        date = datetime.datetime.strptime(date_string, '%d%b%Y') #b is month abbreviation; strptime → parse text into a datetime object
+        month = date.strftime ('%B') #datetime to string 
+
+        if month not in pmvalue_monthly_dict:
+            pmvalue_monthly_dict[month] = [float(mean_pm25)]
+        else:
+            pmvalue_monthly_dict[month].append(float(mean_pm25))
+
+summary_headers = ['Month', 'Mean PM 2.5', ]
+summary_table = []
+for month in pmvalue_monthly_dict:
+    mean_pm25_list = pmvalue_monthly_dict[month]
+    monthly_mean_pm25 = statistics.mean(mean_pm25_list)
+    summary_table.append([month, monthly_mean_pm25])
+
+output_path = Path('/Users/sanyuktasingh/Desktop/data class/Philadelphia PM2.5 2019.csv')
+with open(output_path, 'w', newline="", encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerows([summary_headers]+summary_table)
