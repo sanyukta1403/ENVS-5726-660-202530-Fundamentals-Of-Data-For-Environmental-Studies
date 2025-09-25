@@ -71,8 +71,69 @@ with open('/Users/sanyuktasingh/Desktop/data class/Country_of_Destination_Summar
 
 #TASK 3 
 
-csv_path = Path('/Users/sanyuktasingh/Desktop/data class/Cocoa Supply Chain Data.csv')
+trader_group_deforestation_summary = {} #summarize trader_group by cocoa deforestation
+for trader_group in trader_group_dict:
+    total = sum(trader_group_dict[trader_group]['cocoa_deforestation_15_years_total_exposure']) #get the list of deforestation values for this trader and add them up and save in variable called total
+    trader_group_deforestation_summary[trader_group] = total # Store in a new dictionary: {Trader : SUM}; this holds only total for each trader
 
-summary_by_SUM = {}
+max_deforestation = max(trader_group_deforestation_summary.values()) #.values() gives all the values in the dictionary without the keys; find the largest total deforestation so we can apply the 10% filter later
+trader_group_deforestation_table = [["trader_group", "SUM_cocoa_deforestation"]] #after calculating stats we should store them in a table (list of lists) so we can export to a CSV
+
+for trader_group in trader_group_deforestation_summary:
+    if trader_group_deforestation_summary[trader_group] > 0.1 * max_deforestation:
+        trader_group_deforestation_table.append([trader_group, trader_group_deforestation_summary[trader_group]]) #if above ans yes then we add a row [trader_group, total] to the table
+
+with open('/Users/sanyuktasingh/Desktop/data class/Trader_Group_SUM_deforestation.csv', 'w', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerows(trader_group_deforestation_table)
 
 
+trader_group_emissions_summary = {} #summarize trader_group by net emissions
+for trader_group in trader_group_dict:
+    total = sum(trader_group_dict[trader_group]['cocoa_net_emissions_15_years_total']) 
+    trader_group_emissions_summary[trader_group] = total
+
+max_emissions = max(trader_group_emissions_summary.values())
+trader_group_emissions_table = [['trader_group', 'SUM_cocoa_emissions']]
+
+for trader_group in trader_group_emissions_summary:
+    if trader_group_emissions_summary[trader_group] > 0.1 * max_emissions:
+        trader_group_emissions_table.append([trader_group,trader_group_emissions_summary[trader_group]])
+
+with open('/Users/sanyuktasingh/Desktop/data class/Trader_Group_SUM_emissions.csv', 'w', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerows(trader_group_emissions_table)
+
+
+country_of_destination_summary = {} #summarize country by deforestation
+for country_of_destination in country_of_destination_dict:
+    total = sum(country_of_destination_dict[country_of_destination]['cocoa_deforestation_15_years_total_exposure'])
+    country_of_destination_summary[country_of_destination] = total
+
+max_country_deforestation = max(country_of_destination_summary.values())
+country_of_destination_table = [['country_of_destination', 'SUM_deforestation']]
+
+for country_of_destination in country_of_destination_summary:
+    if country_of_destination_summary[country_of_destination] > 0.1 * max_country_deforestation:
+        country_of_destination_table.append([country_of_destination, country_of_destination_summary[country_of_destination]])
+
+with open('/Users/sanyuktasingh/Desktop/data class/Country_SUM_deforestation.csv', 'w', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerows(country_of_destination_table)
+
+
+country_of_destination_emissions_summary = {} #summarize country by net emissions
+for country_of_destination in country_of_destination_summary:
+    total = sum(country_of_destination_dict[country_of_destination]['cocoa_net_emissions_15_years_total'])
+    country_of_destination_emissions_summary[country_of_destination] = total
+
+max_country_emissions = max(country_of_destination_emissions_summary.values())
+country_emissions_table = [['country_of_destination', 'SUM_emissions']]
+
+for country in country_of_destination_emissions_summary:
+    if country_of_destination_emissions_summary[country] > 0.1 * max_country_emissions:
+        country_emissions_table.append([country, country_of_destination_emissions_summary[country]])
+
+with open('/Users/sanyuktasingh/Desktop/data class/Country_SUM_emissions.csv', 'w', encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerows(country_emissions_table)
