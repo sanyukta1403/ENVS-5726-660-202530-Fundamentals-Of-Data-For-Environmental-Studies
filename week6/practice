@@ -1,0 +1,115 @@
+# info about neighbourhoods
+target_headers = ['Neighborhood_ID', 'Households']
+target_table = [
+    [201, 120],
+    [202, 95],
+    [203, 140],
+    [204, 110],
+    [205, 130],
+]
+
+# info about neighborhood recycling rates
+join_headers = ['Neighborhood_ID', 'Recycling_Rate', 'Rating']
+join_table = [
+    [201, 0.42, 'Average'],
+    [203, 0.67, 'High'],
+    [206, 0.35, 'Low'],
+    [207, 0.75, 'High'],
+]
+
+# INNER JOIN
+
+unique_id_name = 'Neighborhood_ID'
+
+join_id_set = {row[join_headers.index(unique_id_name)] for row in join_table}
+
+target_id_set = {row[target_headers.index(unique_id_name)] for row in target_table}
+
+join_dict = {}
+for row in join_table:
+    unique_id = row[join_headers.index(unique_id_name)] #create key 
+    join_dict[unique_id] = row #create value for key
+
+from pprint import pprint
+pprint(join_dict, width=60)
+
+#Here is the pseudocode for inner join:
+#For Target Row in Target Table:
+    #1. Get Unique ID from Target Row
+        #2. Check if Unique ID is in Join Dictionary.
+            #If True, Get Join Row from Join Dictionary [Unique ID]
+
+both_headers = target_headers+join_headers
+
+inner_joined_table = []
+for target_row in target_table:
+    unique_id = target_row[join_headers.index(unique_id_name)]
+
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+        inner_joined_table.append(target_row+join_row)
+
+print(both_headers)
+for row in inner_joined_table:
+    print(row)
+
+
+# LEFT OUTER JOIN
+
+##Here is the pseudocode for inner join:
+#For Target Row in Target Table:
+    #1. Get Unique ID from Target Row
+        #2. Check if Unique ID is in Join Dictionary.
+            #If True, Get Join Row from Join Dictionary [Unique ID]
+            #Else, Create NULL Join Row
+left_joined_table = []
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+    else:
+        join_row = [None] * len(join_headers)
+    
+    left_joined_table.append(target_row+join_row)
+
+print(join_row)
+for row in left_joined_table:
+    print(row)
+
+
+# FULL OUTER JOIN 
+
+#1. Perform Left Outer Join
+#2. For Join Row in Join Dictionary:
+#Check if Unique ID is in Target Table.
+#If False, Create NULL Target Row
+
+#step 1 - left outer join as done previously
+outer_joined_table = []
+
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+    else:
+        join_row = [None] * len(join_headers) #target headers has length of 2 so this chages it to [None, None]; placeholder row with the right number of columns for the target table part
+    
+    outer_joined_table.append(target_row+join_row)
+
+
+#step 2 - Iterate every row in the Joined Dict and if the unique ID is not in the Target Table, then append it to the Joined Table with a NULL Target Row
+
+target_id_set = {row[target_headers.index(unique_id_name)] for row in target_table}
+
+for unique_id in join_dict:
+    if unique_id not in target_id_set:
+        join_row = join_dict[unique_id]
+
+        target_row = [None] * len(target_headers)
+        outer_joined_table.append(target_row+join_row)
+
+print(both_headers)
+for row in outer_joined_table:
+    print(row)

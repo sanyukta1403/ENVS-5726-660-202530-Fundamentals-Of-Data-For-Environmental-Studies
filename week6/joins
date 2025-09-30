@@ -1,0 +1,121 @@
+#Inner Join only joins rows between two tables that share a unique ID
+#Left Outer Join or Left Join preserves all the rows in one table but only takes matching rows from the other table. It will fill in the missing data with None
+#Full Outer Join preserves all the rows from both tables, regardless whether they share unique IDs. It fills in the missing data with None
+#one-to-one join will only take one value per ID from the Join table. If there are duplicate IDs in the Join table, only the value from the last row with that ID is taken
+#one-to-many join is an outer join where we reproduce duplicates from the Join table into the Target table
+
+target_headers = ['Tract', 'Population']
+target_table = [
+    [30101, 2646],
+    [30103, 2375],
+    [30104, 3424],
+    [30300, 4428],
+    [30400, 5543],
+]
+
+join_headers = ['Tract', 'Risk_Score', 'Risk_Rating']
+join_table = [
+    [30101, 17.5, 'Very Low'],
+    [30103, 5.1, 'Very Low'],
+    [30104, 28.1, 'Relatively Low'],
+    [30200, 54.7, 'Relatively Low'],
+    [30700, 59.7, 'Relatively Low'],
+    [30801, 22.6, 'Very Low']
+]
+
+#to join these two tables we first need to convert the join table to a dictionary because we need unique IDs
+
+unique_id_name = 'Tract'
+
+target_id_set = set([row[target_headers.index(unique_id_name)] for row in target_table]) #loops over each row in target_table, finds the value in the "Tract" column, and pulls those values into a set of unique IDs
+join_id_set = {row[join_headers.index(unique_id_name)] for row in join_table} #can also do {} instead of writing set
+
+print(target_id_set)
+print(join_id_set)
+print(target_id_set.intersection(join_id_set)) #gives us IDs in both tables 
+
+#Our first goal is to create a Join Dictionary from the Join Table. This dictionary will contain all the rows from the Join Table where the key is the unique ID and the value is the entire row.
+
+#we are trying to get {unique id : row to join}
+
+#By storing the Join Table as a dictionary, we will be able to link up each Target Row with its matching Join Row
+
+join_dict = {}
+for row in join_table:
+    unique_id = row[join_headers.index(unique_id_name)] #we can get the unique_id by indexing our join table for each value in the tract column
+    join_dict[unique_id] = row #Populate the Join Dict by creating key value pairs where unique id : row
+
+from pprint import pprint
+pprint(join_dict, width=60)
+
+
+#Here is the pseudocode for inner join:
+#For Target Row in Target Table:
+    #1. Get Unique ID from Target Row
+        #2. Check if Unique ID is in Join Dictionary.
+            #If True, Get Join Row from Join Dictionary [Unique ID]
+joined_headers = target_headers + join_headers
+inner_joined_table = []
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+
+    if unique_id in join_dict: #The Inner Join will only match if the unique ID exists in both the Target Table and the Join Table
+        join_row = join_dict[unique_id] #The Join Dict allows us to access the matching Join Row by the unique ID
+        inner_joined_table.append(target_row + join_row) #Just as we concatenated the Target and Join Headers, we’ll need to populate our Joined Table with the concatenation of Target and Join Rows
+
+print(joined_headers)
+for row in inner_joined_table:
+    print(row)
+
+#left outer join 
+
+joined_headers = target_headers + join_headers
+left_joined_table = []
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+    else:
+        join_row = [None] * len(join_headers) #If the Unique ID doesn’t match, create a NULL Join Row
+    
+    left_joined_table.append(target_row + join_row)
+
+print(joined_headers)
+for row in left_joined_table:
+    print(row)
+
+#The final Joined Table not only includes the Inner Joined rows but also includes rows that exist in the Target Table that do NOT exist in the Joined Table
+
+# full outer join 
+
+#step 1 - left outer join as done previously
+outer_joined_table = []
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+    else:
+        join_row = [None] * len(join_headers)
+    outer_joined_table.append(target_row+join_row)
+
+#step 2 - Iterate every row in the Joined Dict and if the unique ID is not in the Target Table, then append it to the Joined Table with a NULL Target Row
+
+target_id_set = {row[target_headers.index(unique_id_name)] for row in target_table}
+
+for unique_id in join_dict:
+    if unique_id not in target_id_set:
+
+        join_row = join_dict[unique_id]
+
+        target_row = [None] * len(target_headers)
+        outer_joined_table.append(target_row+join_row)
+
+print(joined_headers)
+for row in outer_joined_table:
+    print(row)
+
+#The final Joined Table for a Full Outer Join includes all the following rows:
+    #• Inner Joined Rows
+    #• Left Outer Joined Rows (Rows that exist in the Target Table that do NOT exist in the Joined Table)
+    #• Full Outer Joined Rows (Rows that exist in the Join Table that do NOT exist in the Target Table)

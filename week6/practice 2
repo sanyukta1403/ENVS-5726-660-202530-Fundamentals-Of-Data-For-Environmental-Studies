@@ -1,0 +1,94 @@
+target_headers = ['School_ID', 'Enrollment']
+target_table = [
+    [501, 450],
+    [502, 300],
+    [503, 520],
+    [504, 410],
+]
+
+join_headers = ['School_ID', 'Avg_Score', 'Grade']
+join_table = [
+    [501, 88, 'B+'],
+    [503, 92, 'A-'],
+    [505, 75, 'C'],
+    [506, 81, 'B-'],
+]
+
+# Inner join - only rows in both tables 
+
+unique_id_name = 'School_ID'
+
+target_id_set = {row[target_headers.index(unique_id_name)] for row in target_table}
+join_id_set = {row[join_headers.index(unique_id_name)] for row in join_table}
+
+join_dict = {}
+
+for row in join_table:
+    unique_id = row[join_headers.index(unique_id_name)] #get the unique_id by indexing our Join Table for each value in the School ID column
+    join_dict[unique_id] = row #unique id : row 
+
+from pprint import pprint
+pprint(join_dict, width=60)
+
+joined_headers = target_headers + join_headers
+
+inner_joined_table = []
+
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+        inner_joined_table.append(target_row+join_row)
+
+print(joined_headers)
+for row in inner_joined_table:
+    print(row)
+
+# left outer join - all rows in one table and only matching from the other, missing data will be none 
+
+left_joined_tale = []
+
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+    else:
+        join_row = [None] * len(join_headers)
+    
+    left_joined_tale.append(target_row+join_row)
+
+print(joined_headers)
+for row in left_joined_tale:
+    print(row)
+
+# full outer joined - all rows from both tables 
+
+outer_joined_table = []
+
+# start wirh a left outer join 
+for target_row in target_table:
+    unique_id = target_row[target_headers.index(unique_id_name)]
+
+    if unique_id in join_dict:
+        join_row = join_dict[unique_id]
+    else:
+        join_row = [None] * len(join_headers)
+    
+    outer_joined_table.append(target_row+join_row)
+
+#Step 2 – Iterate every row in the Joined Dict and if the unique ID is not in the Target Table, then append it to the Joined Table with a NULL Target Row
+
+target_id_set = {row[target_headers.index(unique_id_name)] for row in target_table} 
+
+for unique_id in join_dict:
+    if unique_id not in target_table:
+        join_row = join_dict[unique_id]
+
+        join_row = [None] * len(target_headers)
+        outer_joined_table.append(target_row+join_row)
+
+print(joined_headers)
+for row in outer_joined_table:
+    print(row)
