@@ -9,7 +9,7 @@ social_table = []
 
 with open(social_path, 'r', encoding='cp1252') as social_file:
     reader = csv.reader(social_file)
-    social_headers = next(reader) #store headers 
+    social_headers = next(reader) #reads first line and stores it as headers 
     
     for row in reader:
         social_table.append(row) #store all rows 
@@ -30,15 +30,15 @@ with open(ej_screen_path, 'r', encoding='cp1252') as ej_screen_file:
 
 # find id column indixes 
 
-social_id_index = social_headers.index('ID_SOCVUL')
+social_id_index = social_headers.index('ID_SOCVUL') #finding index of the header
 ej_screen_index =  ej_screen_headers.index('ID_HAZ')
 
-# build dictionaries to assign unique id to rows 
+# build dictionaries because we first need unique IDs 
 
 social_dict = {}
-for social_row in social_table:
-    unique_id = social_row[social_id_index]
-    social_dict[unique_id] = social_row
+for social_row in social_table: #iterate every row in social vul file 
+    unique_id = social_row[social_id_index] #using index to extract the ID from any row
+    social_dict[unique_id] = social_row #key is the unique ID and the value is the entire row
 
 
 ej_screen_dict = {}
@@ -49,28 +49,28 @@ for ej_screen_row in ej_screen_table:
 joined_headers = social_headers + ej_screen_headers
 
 
-# performing left outer join 
+# performing left outer join - every social row, attach matching ej row (None)
 
 outer_joined_table = []
 
-for social_row in social_table:
+for social_row in social_table: #social_table is the base dataset so every social row should appear no matter what
     unique_id = social_row[social_id_index]
-    if unique_id in ej_screen_dict:
-        ej_screen_row = ej_screen_dict[unique_id]
+    if unique_id in ej_screen_dict: #test whether a hazard row exists with the same ID
+        ej_screen_row = ej_screen_dict[unique_id] #if yes extract those rows from hazards
     else:
-        ej_screen_row = [None] * len(ej_screen_headers)
-    outer_joined_table.append(social_row + ej_screen_row)
+        ej_screen_row = [None] * len(ej_screen_headers) #if not create None entries in the same length as headers so row in correct width
+    outer_joined_table.append(social_row + ej_screen_row) #concatenate the lists into one row then append to table
 
-#  adding hazrds rows (full outer join)
+#  adding hazrds rows (for full outer join) - add any ej rows that had no social match
 
 social_id_set = {row[social_id_index] for row in social_table} #loops over each row in social_table, finds the value in the first column, and pulls those values into a set of unique IDs
 
-for unique_id in ej_screen_dict:
-    if unique_id not in social_id_set:
+for unique_id in ej_screen_dict: #iterate over all IDs in hazards dict 
+    if unique_id not in social_id_set: #if ID not in social set, the row has no match
 
-        ej_screen_row = ej_screen_dict[unique_id]
+        ej_screen_row = ej_screen_dict[unique_id] #look up the hazard data in dict that belongs to the unique id 
 
-        social_row = [None] * len(social_headers)
+        social_row = [None] * len(social_headers) #create row of None 
         outer_joined_table.append(social_row + ej_screen_row)
 
 output_path = Path('/Users/sanyuktasingh/Desktop/data class/week6/task1.csv')
@@ -83,11 +83,11 @@ with open(output_path, 'w', newline="", encoding='cp1252') as f:
 
 # TASK 2 
 
-total_rows = len(outer_joined_table)
+total_rows = len(outer_joined_table) 
 
 #to access the correct value we asjust the indexes 
 
-joined_social_index = social_id_index #same as original table
+joined_social_index = social_id_index #same as original table; we index to the ID cause we are trying to find how many rows of that column are valid 
 joined_ej_screen_index = len(social_headers) + ej_screen_index #columns of hazards shift right so index changes so we count number of headers then add the hazards columns
 
 #to check validity the numbers have to be greater than 0
@@ -96,8 +96,8 @@ social_valid = []
 ej_screen_valid = []
 
 for row in outer_joined_table:
-    if row[joined_social_index] not in [None, "", " "]: #check valid IDs 
-        social_valid.append(row)
+    if row[joined_social_index] not in [None, "", " "]: #check valid IDs; if it's not in none "" " " 
+        social_valid.append(row) #add row to social valid 
     if row[joined_ej_screen_index] not in [None, "", " "]:
         ej_screen_valid.append(row)
 
@@ -126,14 +126,29 @@ print(f'There are {count_intersection} inner joined rows of {total_rows} total B
 
 # TASK 4 
 
+replaced_table = [[0 if cell in ["", " ", None] else cell for cell in row] for row in outer_joined_table] #look through each row in table then loop through each cell and replace with 0 else keep it as is
+
+#for row in outer_joined_table:
+    #new_row = []
+    #for value in row:
+    #   if value in ["", " ", None]:
+    #       new_row.append(0)
+    #   else:
+    #       new_row.append(value)
+    #replaced_table.append(new_row)
+
 inner_joined_table = []
 
-for row in outer_joined_table:
-    if row[joined_social_index] not in [None, "", " "] and row[joined_ej_screen_index] not in [None, "", " "]:
-        inner_joined_table.append(row)
+for row in replaced_table:
+    if row[joined_social_index] != 0 and row[joined_ej_screen_index] != 0: #if both values are not 0 that means they had matched in both tables
+        inner_joined_table.append(row) #add to table
 
 output_path = Path('/Users/sanyuktasingh/Desktop/data class/week6/inner_joined.csv')
 with open(output_path, 'w', newline="", encoding='cp1252') as f:
     writer = csv.writer(f)
     writer.writerow(joined_headers)
-    writer.writerows(inner_joined_table)
+    writer.writerows(inner_joined_table) 
+
+
+#joined_social_index is where our social vulnerability values are stored
+#joined_ej_screen_index is where our hazards values are stored
