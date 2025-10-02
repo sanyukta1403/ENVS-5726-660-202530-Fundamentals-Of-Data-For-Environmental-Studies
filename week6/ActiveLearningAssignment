@@ -1,0 +1,139 @@
+# TASK 1 
+
+from pathlib import Path
+import csv
+
+#social file 
+social_path = Path('/Users/sanyuktasingh/Desktop/data class/week6/Social Vulnerability Data.csv')
+social_table = []
+
+with open(social_path, 'r', encoding='cp1252') as social_file:
+    reader = csv.reader(social_file)
+    social_headers = next(reader) #store headers 
+    
+    for row in reader:
+        social_table.append(row) #store all rows 
+
+
+
+#hazards file 
+
+ej_screen_path = Path('/Users/sanyuktasingh/Desktop/data class/week6/EJSCREEN Block Group Hazards.csv')
+ej_screen_table = []
+
+with open(ej_screen_path, 'r', encoding='cp1252') as ej_screen_file:
+    reader = csv.reader(ej_screen_file)
+    ej_screen_headers = next(reader)
+
+    for row in reader:
+        ej_screen_table.append(row)
+
+# find id column indixes 
+
+social_id_index = social_headers.index('ID_SOCVUL')
+ej_screen_index =  ej_screen_headers.index('ID_HAZ')
+
+# build dictionaries to assign unique id to rows 
+
+social_dict = {}
+for social_row in social_table:
+    unique_id = social_row[social_id_index]
+    social_dict[unique_id] = social_row
+
+
+ej_screen_dict = {}
+for ej_screen_row in ej_screen_table:
+    ej_unique_id = ej_screen_row[ej_screen_index]
+    ej_screen_dict[ej_unique_id] = ej_screen_row
+
+joined_headers = social_headers + ej_screen_headers
+
+
+# performing left outer join 
+
+outer_joined_table = []
+
+for social_row in social_table:
+    unique_id = social_row[social_id_index]
+    if unique_id in ej_screen_dict:
+        ej_screen_row = ej_screen_dict[unique_id]
+    else:
+        ej_screen_row = [None] * len(ej_screen_headers)
+    outer_joined_table.append(social_row + ej_screen_row)
+
+#  adding hazrds rows (full outer join)
+
+social_id_set = {row[social_id_index] for row in social_table} #loops over each row in social_table, finds the value in the first column, and pulls those values into a set of unique IDs
+
+for unique_id in ej_screen_dict:
+    if unique_id not in social_id_set:
+
+        ej_screen_row = ej_screen_dict[unique_id]
+
+        social_row = [None] * len(social_headers)
+        outer_joined_table.append(social_row + ej_screen_row)
+
+output_path = Path('/Users/sanyuktasingh/Desktop/data class/week6/task1.csv')
+with open(output_path, 'w', newline="", encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerows([joined_headers] + outer_joined_table)
+
+
+
+
+# TASK 2 
+
+total_rows = len(outer_joined_table)
+
+#to access the correct value we asjust the indexes 
+
+joined_social_index = social_id_index #same as original table
+joined_ej_screen_index = len(social_headers) + ej_screen_index #columns of hazards shift right so index changes so we count number of headers then add the hazards columns
+
+#to check validity the numbers have to be greater than 0
+
+social_valid = []
+ej_screen_valid = []
+
+for row in outer_joined_table:
+    if row[joined_social_index] not in [None, "", " "]: #check valid IDs 
+        social_valid.append(row)
+    if row[joined_ej_screen_index] not in [None, "", " "]:
+        ej_screen_valid.append(row)
+
+
+#count valid IDs 
+valid_social_count = len(social_valid)
+valid_ej_screen_count = len(ej_screen_valid)
+
+print(f'There are {valid_social_count} valid ID_SOCVUL out of {total_rows} total joined rows')
+print(f'There are {valid_ej_screen_count} valid ID_HAZ out of {total_rows} total joined rows')
+
+
+
+
+# TASK 3 - using set intersection to find the valyues shared between both sets
+
+social_id_set = {row[social_id_index] for row in social_table}
+ej_screen_set = {row[ej_screen_index] for row in ej_screen_table}
+
+intersection_of_tables = social_id_set.intersection(ej_screen_set)
+count_intersection = len(intersection_of_tables)
+
+print(f'There are {count_intersection} inner joined rows of {total_rows} total Block Groups')
+
+
+
+# TASK 4 
+
+inner_joined_table = []
+
+for row in outer_joined_table:
+    if row[joined_social_index] not in [None, "", " "] and row[joined_ej_screen_index] not in [None, "", " "]:
+        inner_joined_table.append(row)
+
+output_path = Path('/Users/sanyuktasingh/Desktop/data class/week6/inner_joined.csv')
+with open(output_path, 'w', newline="", encoding='cp1252') as f:
+    writer = csv.writer(f)
+    writer.writerow(joined_headers)
+    writer.writerows(inner_joined_table)
