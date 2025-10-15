@@ -8,3 +8,15 @@ response = requests.get(url= epqs_url) #The get method allows us to make a GET r
 result = response.json() #Using the json method on the response returns a Python dictionary or list containing the response data; this method only works if the response returns a json
 
 pprint(result, width=30)
+
+from pprint import pprint
+import requests
+
+nld_systems_url = 'https://levees.sec.usace.army.mil:443/api-local/systems/query?as=system&in=%40state%3Alouisiana&md=false'
+nld_systems = requests.get(url=nld_systems_url).json()
+
+print(f'There are {len(nld_systems)} levee systems in Louisiana')
+pprint(nld_systems[0], width=60)
+
+nld_systems_headers = ['ID', 'Location', 'Accreditation Rating', 'Primary Purpose']
+nld_systems_table = []
