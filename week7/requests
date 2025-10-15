@@ -1,0 +1,10 @@
+from pprint import pprint
+import requests
+
+epqs_url = ('https://epqs.nationalmap.gov/v1/json?x=-75.19115268581372&y=39.9513917147093&units=Feet&wkid=4326&includeDate=False')
+
+response = requests.get(url= epqs_url) #The get method allows us to make a GET request to the URL. This returns a response object
+
+result = response.json() #Using the json method on the response returns a Python dictionary or list containing the response data; this method only works if the response returns a json
+
+pprint(result, width=30)
