@@ -20,3 +20,14 @@ pprint(nld_systems[0], width=60)
 
 nld_systems_headers = ['ID', 'Location', 'Accreditation Rating', 'Primary Purpose']
 nld_systems_table = []
+
+for nld_system in nld_systems:
+    system_id = nld_system['id']
+    location = nld_system['location']
+    rating = nld_system['femaAccreditationRating']
+    purpose = nld_system['primaryPurpose']
+
+    nld_systems_table.append([system_id, location, rating, purpose])
+
+print(nld_systems_headers)
+for row in nld_systems_table:print(row)

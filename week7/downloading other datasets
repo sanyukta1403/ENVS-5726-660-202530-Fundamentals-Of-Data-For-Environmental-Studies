@@ -1,0 +1,7 @@
+from pprint import pprint
+import requests
+
+wash_files_url = 'https://datasafe-h5afbhf4gwctabaa.z01.azurefd.net/api/Files/TOP/rep_wash'
+wash_files_data = requests.get(url=wash_files_url).json()
+
+pprint(wash_files_data, width=60)
