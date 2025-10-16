@@ -1,0 +1,11 @@
+from pprint import pprint
+import requests
+
+map_url = 'https://routing.openstreetmap.de/routed-car/route/v1/driving/-75.113525,39.964491;-74.005939,40.712739?overview=false&alternatives=true&steps=true'
+
+
+response = requests.get(url=map_url)
+result = response.json()
+
+pprint(result, width=30)
+
