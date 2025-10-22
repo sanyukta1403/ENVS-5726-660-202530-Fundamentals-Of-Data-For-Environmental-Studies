@@ -61,7 +61,7 @@ osrm_url = 'https://routing.openstreetmap.de/routed-car/route/v1/driving/'
 
 petroleum_table[0].append('DriveDuration_Seconds') #add that new column name to the end of that header list
     
-updated_rows = [petroleum_table[0]]  # make list of lists 
+updated_rows = [petroleum_table[0]]  # new list to hold the updated rows, not append to the same list we're looping through
 
 for row in petroleum_table[1:]: #loop through all rows except the header 
     latitude = row[headers.index('Latitude')]
