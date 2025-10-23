@@ -1,1 +1,36 @@
 from pathlib import Path
+import csv
+from collections import namedtuple
+from pprint import pprint
+import pandas as pd
+from typing import List
+
+
+wash_file_path = '/Users/sanyuktasingh/Desktop/data class/week8/Rohingya WASH Survey.csv'
+
+with open(wash_file_path, 'r', encoding='cp1252') as wash_file:
+    reader = csv.reader(wash_file)
+    headers = next(reader)
+
+    WashSurvey = namedtuple(typename='WashSurvey', field_names = headers)
+
+    Wash_Survey_table: List[WashSurvey] = []
+
+    for row in reader:
+        wash_survey = WashSurvey(*row)
+        Wash_Survey_table.append(wash_survey)
+
+#for row in Wash_Survey_table[:2]:
+    #print(row)
+
+import_to_panda = pd.DataFrame.from_records(
+    data = Wash_Survey_table,
+    columns= WashSurvey._fields
+)
+
+#print(import_to_panda.head())
+
+filtered_for_g_df = import_to_panda.filter(regex='^G')
+
+filtered_g_table = list(filtered_for_g_df.itertuples(name='WashSurvey', index=False))
+print(filtered_g_table[0])
