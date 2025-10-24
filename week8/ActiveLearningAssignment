@@ -4,6 +4,7 @@ from collections import namedtuple
 from pprint import pprint
 import pandas as pd
 from typing import List
+import sys
 
 
 wash_file_path = '/Users/sanyuktasingh/Desktop/data class/week8/Rohingya WASH Survey.csv'
@@ -33,4 +34,17 @@ import_to_panda = pd.DataFrame.from_records(
 filtered_for_g_df = import_to_panda.filter(regex='^G')
 
 filtered_g_table = list(filtered_for_g_df.itertuples(name='WashSurvey', index=False))
-print(filtered_g_table[0])
+#print(filtered_g_table[0])
+
+sys.path.append('/Users/sanyuktasingh/Desktop/data class/week8')
+
+from datalib import convert_yesno_to_binary
+
+g_and_binary_table = convert_yesno_to_binary(filtered_g_table)
+
+#print(g_and_binary_table[0]) 
+
+from datalib import convert_str_to_numeric
+
+new_table = convert_str_to_numeric(g_and_binary_table)
+print(new_table[0])
