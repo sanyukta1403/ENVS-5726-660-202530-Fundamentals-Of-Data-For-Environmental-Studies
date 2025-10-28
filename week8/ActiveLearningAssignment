@@ -6,6 +6,7 @@ import pandas as pd
 from typing import List
 import sys
 
+# TASK 1
 
 wash_file_path = '/Users/sanyuktasingh/Desktop/data class/week8/Rohingya WASH Survey.csv'
 
@@ -36,6 +37,8 @@ filtered_for_g_df = import_to_panda.filter(regex='^G')
 filtered_g_table = list(filtered_for_g_df.itertuples(name='WashSurvey', index=False))
 #print(filtered_g_table[0])
 
+# TASK 2
+
 sys.path.append('/Users/sanyuktasingh/Desktop/data class/week8')
 
 from datalib import convert_yesno_to_binary
@@ -44,7 +47,128 @@ g_and_binary_table = convert_yesno_to_binary(filtered_g_table)
 
 #print(g_and_binary_table[0]) 
 
+# TASK 3
+
 from datalib import convert_str_to_numeric
 
 new_table = convert_str_to_numeric(g_and_binary_table)
-print(new_table[0])
+#print(new_table[0])
+
+# TASK 4 
+
+# even though the table does not have NaN values, the FactorAnalyzer function creates NaNs or infinite values internally when it tries to compute a correlation matrix using columns that have zero variance or are perfectly correlated 
+# the solution is to standardize the data before performing factor analysis so that each variable contributes equally to the analysis
+# https://stackoverflow.com/questions/56722430/factor-analysis-using-python-factor-analyzer 
+
+# TASK 5 
+
+import numpy as np  
+
+df_numeric = pd.DataFrame.from_records(new_table) #convert clean list of NamedTuples into a Pandas DataFrame
+df_numeric = df_numeric.apply(pd.to_numeric, errors='coerce') 
+
+# Create correlation matrix (this is the table with NaN values)
+corr_matrix = df_numeric.corr()
+print("\n--- Correlation matrix with NaN values ---")
+print(corr_matrix)
+
+# Remove NaN values
+corr_clean = corr_matrix.dropna(axis=0, how='all').dropna(axis=1, how='all')
+
+#Defines a function to find and remove highly correlated variables
+def findCorrelation(corr, cutoff=0.9, exact=None): 
+    def _findCorrelation_fast(corr, avg, cutoff): # A faster internal method that uses averages to decide which columns to drop
+        combsAboveCutoff = corr.where(lambda x: (np.tril(x)==0) & (x > cutoff)).stack().index
+        rowsToCheck = combsAboveCutoff.get_level_values(0)
+        colsToCheck = combsAboveCutoff.get_level_values(1)
+        msk = avg[colsToCheck] > avg[rowsToCheck].values
+        deletecol = pd.unique(np.r_[colsToCheck[msk], rowsToCheck[~msk]]).tolist()
+        return deletecol
+
+    def _findCorrelation_exact(corr, avg, cutoff): # A slower but more precise method that recomputes correlations at each step
+        x = corr.loc[(*[avg.sort_values(ascending=False).index]*2,)]
+        x = x.astype(float)
+        x.values[(*[np.arange(len(x))]*2,)] = np.nan
+        deletecol = []
+        for ix, i in enumerate(x.columns[:-1]):
+            for j in x.columns[ix+1:]:
+                if x.loc[i, j] > cutoff:
+                    if x[i].mean() > x[j].mean():
+                        deletecol.append(i)
+                        x.loc[i] = x[i] = np.nan
+                    else:
+                        deletecol.append(j)
+                        x.loc[j] = x[j] = np.nan
+        return deletecol
+
+    if not np.allclose(corr, corr.T) or any(corr.columns != corr.index):
+        raise ValueError("correlation matrix is not symmetric.")
+    acorr = corr.abs() # Converts all correlation values to absolute values
+    avg = acorr.mean() # Calculates the average correlation of each variable
+    if exact or exact is None and corr.shape[1] < 100: # Chooses between the exact or fast method based on matrix size
+        return _findCorrelation_exact(acorr, avg, cutoff)
+    else:
+        return _findCorrelation_fast(acorr, avg, cutoff) # Runs the chosen method and returns the columns to remove
+
+# Apply the correlation filter
+high_corr_cols = findCorrelation(corr_clean, cutoff=0.9)
+print("\nHighly correlated columns to remove:", high_corr_cols)
+
+# Clean final DataFrame
+df_final = df_numeric.drop(columns=high_corr_cols, errors='ignore').dropna()
+print("\n--- Final cleaned DataFrame ---")
+print(df_final.head())
+
+# The code follows the same steps as the Stack_Overflow_Factor_Analysis_Debug_2.html example, which demonstrates the use of a correlation matrix and the findCorrelation() function to identify and remove highly correlated variables before factor analysis. I replicated those steps in Python by creating the correlation matrix from my cleaned DataFrame, observing NaN values for non-variable or missing data, cleaning the matrix, and applying the same findCorrelation() logic shown in the HTML.
+ 
+# TASK 6 
+
+import numpy as np
+import pandas as pd
+from factor_analyzer import FactorAnalyzer
+
+# --- Clean Data ---
+data = df_final.select_dtypes(include=[np.number])  # only numeric
+data = data.replace([np.inf, -np.inf], np.nan)
+
+# Step 1: Check how many NaNs in each column
+nan_counts = data.isna().sum()
+print("NaN counts per column:\n", nan_counts[nan_counts > 0])
+
+# Step 2: Drop columns with too many NaNs if needed (say >20%)
+too_many_nans = nan_counts[nan_counts > len(data) * 0.2].index
+print("Dropping these columns due to too many NaNs:", too_many_nans.tolist())
+data = data.drop(columns=too_many_nans)
+
+# Step 3: Drop any remaining rows with NaNs
+data = data.dropna().reset_index(drop=True)
+
+# Step 4: Final validation
+print("Any NaNs left?", data.isna().any().any())
+print("Any inf values left?", np.isinf(data).any().any())
+print("Data shape after cleaning:", data.shape)
+
+# Drop problematic columns
+zero_var_cols = data.columns[data.std() == 0]
+print("Dropping zero-variance columns:", zero_var_cols.tolist())
+data = data.drop(columns=zero_var_cols)
+
+# Final check before FA
+print("Final shape:", data.shape)
+print("Any NaNs left?", data.isna().any().any())
+print("Any inf values left?", np.isinf(data).any().any())
+
+# Run FA
+number_of_factors = 5
+fa = FactorAnalyzer(n_factors=number_of_factors, rotation='varimax')
+fa.fit(data)
+
+
+# --- Run Factor Analysis only if data is fully clean ---
+if not data.isna().any().any() and not np.isinf(data).any().any():
+    number_of_factors = 5
+    fa = FactorAnalyzer(n_factors=number_of_factors, rotation='varimax')
+    fa.fit(data)
+    print("Factor analysis successfully ran.")
+else:
+    print("⚠️ Data still contains invalid values. Fix before running FA.")
