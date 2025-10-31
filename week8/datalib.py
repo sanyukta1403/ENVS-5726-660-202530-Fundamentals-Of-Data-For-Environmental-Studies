@@ -52,24 +52,28 @@ def convert_str_to_numeric(table: List[tuple]) -> List[tuple]:
 
 from typing import List
 
-def convert_values_to_numeric(table: List[tuple]) -> List[tuple]:
-    named_tuple_class = type(table[0]) # takes the first row of the table and gets its type the namedtuple clas
-    column_name_list = named_tuple_class._fields
+def convert_str_to_numeric(table: List[tuple]) -> List[tuple]:
+    named_tuple_class = type(table[0]) # takes the first row of the table and gets its type: the namedtuple clas
+    column_name_list = named_tuple_class._fields #returns a list of all the field names
 
     numeric_column_list = []
-    for column_name in column_name_list: 
-        column_values = [getattr(row, column_name)
+    for column_name in column_name_list: #looping over every column in the table
+        column_values = [getattr(row, column_name) #fetches the value of that specific column (like row.Gender) for each row
                          for row in table]
-        unique_non_numeric_column_values = set([column_value
+        
+        #this goes through the column values and filters out anything that’s already numeric
+        unique_non_numeric_column_values = set([column_value 
                                                 for column_value in column_values
                                                 if not isinstance(column_value, (int, float, complex))])
-
+        
         map_dict = {unique_value: index
-                    for (index, unique_value) in enumerate(unique_non_numeric_column_values)}
+                    for (index, unique_value) in enumerate(unique_non_numeric_column_values)} #assigns an index number to each unique string so that the function knows how to replace strings with numbers
+        
+        #this replaces each value in the column using the mapping; if the value is in map_dict (ex: 'Male'), it replaces it with the numeric code (ex: 0)
         numeric_column_values = [map_dict[column_value] if column_value in map_dict else column_value
                                  for column_value in column_values]
-        numeric_column_list.append(numeric_column_values)
+        numeric_column_list.append(numeric_column_values) #
 
-    numeric_row_table = [list(column) for column in zip(*numeric_column_list)]
-    numeric_tuple_table = [named_tuple_class(*row) for row in numeric_row_table]
+    numeric_row_table = [list(column) for column in zip(*numeric_column_list)] #transposes the list of columns into a list of rows
+    numeric_tuple_table = [named_tuple_class(*row) for row in numeric_row_table] #rebuilds each row list into an instance of the original NamedTuple class
     return numeric_tuple_table

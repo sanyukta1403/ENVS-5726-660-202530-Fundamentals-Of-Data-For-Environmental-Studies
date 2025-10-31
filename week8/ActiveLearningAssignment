@@ -52,7 +52,7 @@ g_and_binary_table = convert_yesno_to_binary(filtered_g_table)
 from datalib import convert_str_to_numeric
 
 new_table = convert_str_to_numeric(g_and_binary_table)
-#print(new_table[0])
+print(new_table[0])
 
 """""
 # TASK 4 
@@ -133,6 +133,8 @@ print(df_final.head())
 
 
 # The code follows the same steps as the Stack_Overflow_Factor_Analysis_Debug_2.html example, which demonstrates the use of a correlation matrix and the findCorrelation() function to identify and remove highly correlated variables before factor analysis. I replicated those steps in Python by creating the correlation matrix from my cleaned DataFrame, observing NaN values for non-variable or missing data, cleaning the matrix, and applying the same findCorrelation() logic shown in the HTML.
+
+#The table with NaN values is the correlation matrix, which shows how strongly each variable is related to every other variable in the survey dataset. Some cells contain NaN because certain columns either had no variation (e.g., all responses were identical) or contained non-numeric/missing data that could not be used in correlation calculations. By cleaning the data and removing these problematic columns or rows, we obtained a complete numeric dataset suitable for further analysis.
  
 # TASK 6 
 
