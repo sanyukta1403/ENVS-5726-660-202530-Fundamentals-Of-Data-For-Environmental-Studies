@@ -1,6 +1,6 @@
 from typing import List, Any
 
-def convert_yesno_to_binary(table: List[tuple]) -> List[tuple]:
+def convert_yesno_to_binary(table: List[tuple]) -> List[tuple]: #the function expects table to be a list of tuples 
     theclass = type(table[0]) # get the NamedTuple class
     binary_table = [] # this will store the modified rows
 
@@ -8,7 +8,7 @@ def convert_yesno_to_binary(table: List[tuple]) -> List[tuple]:
         binary_list = list(row)  # turn NamedTuple into a list
         binary_row_list = [] # store converted values for this one row
 
-        for value in binary_list:
+        for value in binary_list: 
             if value == 'Yes':
                 binary_row_list.append(1)
             elif value in ["", "No", "Do not know", "Do Not Know"]:
@@ -21,20 +21,22 @@ def convert_yesno_to_binary(table: List[tuple]) -> List[tuple]:
     
     return binary_table
 
+
+"""""
 def convert_str_to_numeric(table: List[tuple]) -> List[tuple]:
-    string_class = type(table[0])
+    string_class = type(table[0]) # get the class type of the first row in the table
 
-    string_to_value_dict = {} #dict to map string to number 
-    next_num = 1 #assigning strings beginining with number 1 
+    string_to_value_dict = {} # dict to map string to number 
+    next_num = 1 # assigning strings beginining with number 1 
 
-    str_to_val_table = []
+    str_to_val_table = [] # initializes an empty list to hold the converted rows
 
     for row in table:
-        values_list = list(row)
+        values_list = list(row) # converts the NamedTuple which is immutable into a mutable list so you can modify its contents
 
-        for i, value in enumerate(values_list):
-            if isinstance(value, (int, float)) or value == "":
-                continue
+        for i, value in enumerate(values_list): # iterates over every value and its index in the current row
+            if isinstance(value, (int, float)) or value == "": #skips any value that is already numeric (int or float), or is an empty string ("")
+                continue # if this cell doesn’t need converting, ignore it and go to the next one
 
             if value not in string_to_value_dict:
                 string_to_value_dict[value] = next_num
@@ -46,4 +48,28 @@ def convert_str_to_numeric(table: List[tuple]) -> List[tuple]:
     
     return str_to_val_table
 
+"""""
 
+from typing import List
+
+def convert_values_to_numeric(table: List[tuple]) -> List[tuple]:
+    named_tuple_class = type(table[0]) # takes the first row of the table and gets its type the namedtuple clas
+    column_name_list = named_tuple_class._fields
+
+    numeric_column_list = []
+    for column_name in column_name_list: 
+        column_values = [getattr(row, column_name)
+                         for row in table]
+        unique_non_numeric_column_values = set([column_value
+                                                for column_value in column_values
+                                                if not isinstance(column_value, (int, float, complex))])
+
+        map_dict = {unique_value: index
+                    for (index, unique_value) in enumerate(unique_non_numeric_column_values)}
+        numeric_column_values = [map_dict[column_value] if column_value in map_dict else column_value
+                                 for column_value in column_values]
+        numeric_column_list.append(numeric_column_values)
+
+    numeric_row_table = [list(column) for column in zip(*numeric_column_list)]
+    numeric_tuple_table = [named_tuple_class(*row) for row in numeric_row_table]
+    return numeric_tuple_table

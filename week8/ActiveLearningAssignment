@@ -14,34 +14,34 @@ with open(wash_file_path, 'r', encoding='cp1252') as wash_file:
     reader = csv.reader(wash_file)
     headers = next(reader)
 
-    WashSurvey = namedtuple(typename='WashSurvey', field_names = headers)
+    WashSurvey = namedtuple(typename='WashSurvey', field_names = headers) # creates a named tuple class called WashSurvey using the header names as field names; access data by attribute name
 
-    Wash_Survey_table: List[WashSurvey] = []
+    Wash_Survey_table: List[WashSurvey] = [] #initializes an empty list that will store all the rows as WashSurvey objects
 
-    for row in reader:
-        wash_survey = WashSurvey(*row)
+    for row in reader: 
+        wash_survey = WashSurvey(*row) #creates a new WashSurvey namedtuple by unpacking all columns in that row into the corresponding fields
         Wash_Survey_table.append(wash_survey)
 
 #for row in Wash_Survey_table[:2]:
     #print(row)
 
-import_to_panda = pd.DataFrame.from_records(
+import_to_panda = pd.DataFrame.from_records( #converts the list of namedtuples into a Pandas DataFrame
     data = Wash_Survey_table,
-    columns= WashSurvey._fields
+    columns= WashSurvey._fields #gives the DataFrame the same column names as the CSV headers (namedtuple fields)
 )
 
-#print(import_to_panda.head())
+#print(import_to_panda.head()) #prints the first 5 rows of your DataFrame 
 
 filtered_for_g_df = import_to_panda.filter(regex='^G')
 
 filtered_g_table = list(filtered_for_g_df.itertuples(name='WashSurvey', index=False))
-#print(filtered_g_table[0])
+print(filtered_g_table[0])
 
 # TASK 2
 
-sys.path.append('/Users/sanyuktasingh/Desktop/data class/week8')
+sys.path.append('/Users/sanyuktasingh/Desktop/data class/week8') #adds a new directory path to Python’s module search path
 
-from datalib import convert_yesno_to_binary
+from datalib import convert_yesno_to_binary #imports the specific function from datalib
 
 g_and_binary_table = convert_yesno_to_binary(filtered_g_table)
 
@@ -54,12 +54,14 @@ from datalib import convert_str_to_numeric
 new_table = convert_str_to_numeric(g_and_binary_table)
 #print(new_table[0])
 
+"""""
 # TASK 4 
 
-# even though the table does not have NaN values, the FactorAnalyzer function creates NaNs or infinite values internally when it tries to compute a correlation matrix using columns that have zero variance or are perfectly correlated 
-# the solution is to standardize the data before performing factor analysis so that each variable contributes equally to the analysis
-# https://stackoverflow.com/questions/56722430/factor-analysis-using-python-factor-analyzer 
+even though the table does not have NaN values, the FactorAnalyzer function creates NaNs or infinite values internally when it tries to compute a correlation matrix using columns that have zero variance or are perfectly correlated 
+the solution is to standardize the data before performing factor analysis so that each variable contributes equally to the analysis
+https://stackoverflow.com/questions/56722430/factor-analysis-using-python-factor-analyzer 
 
+"""
 # TASK 5 
 
 import numpy as np
@@ -74,92 +76,46 @@ corr_matrix = df_numeric.corr()
 print("\n--- Correlation matrix with NaN values ---")
 print(corr_matrix)
 
-# Remove rows/columns that are entirely NaN
-corr_clean = corr_matrix.dropna(axis=0, how='all').dropna(axis=1, how='all')
+corr_clean = corr_matrix.dropna(axis=0, how='all').dropna(axis=1, how='all') # Remove rows/columns that are entirely NaN
 
 
-# ---------------------------------------------------------------------------
-# Define the findCorrelation() function (matches the second script exactly)
-# ---------------------------------------------------------------------------
-def findCorrelation(corr, cutoff=0.9, exact=None):
-    """
-    This function is the Python implementation of the R function 
-    `findCorrelation()`.
+def findCorrelation(corr, cutoff=0.9, exact=None): # identifies and removes columns that are too highly correlated with each other
 
-    Relies on numpy and pandas, so must have them pre-installed.
+    def _findCorrelation_fast(corr, avg, cutoff): # defines a helper function to quickly find highly correlated columns to remove
+        combsAboveCutoff = corr.where(lambda x: (np.tril(x) == 0) & (x > cutoff)).stack().index # finds all unique pairs of columns whose correlation is above the cutoff 
+        rowsToCheck = combsAboveCutoff.get_level_values(0) # extracts the first column names from those correlated pairs
+        colsToCheck = combsAboveCutoff.get_level_values(1) # extracts the second column names from those correlated pairs
+        msk = avg[colsToCheck] > avg[rowsToCheck].values # compares average correlations to decide which column in each pair is more correlated overall
+        deletecol = pd.unique(np.r_[colsToCheck[msk], rowsToCheck[~msk]]).tolist() # collects the columns to drop and removes dupplicates
+        return deletecol # returns the list of column names to remove
 
-    It searches through a correlation matrix and returns a list of column names 
-    to remove to reduce pairwise correlations.
+    def _findCorrelation_exact(corr, avg, cutoff): # defines a slower but more precise method for finding highly correlated columns
+        x = corr.loc[(*[avg.sort_values(ascending=False).index]*2,)] # reorders the correlation matrix so columns with higher average correlations come first
 
-    For the documentation of the R function, see 
-    https://www.rdocumentation.org/packages/caret/topics/findCorrelation
-    and for the source code of `findCorrelation()`, see
-    https://github.com/topepo/caret/blob/master/pkg/caret/R/findCorrelation.R
-
-    -----------------------------------------------------------------------------
-    Parameters:
-    -----------
-    corr: pandas dataframe.
-        A correlation matrix as a pandas dataframe.
-    cutoff: float, default: 0.9.
-        A numeric value for the pairwise absolute correlation cutoff
-    exact: bool, default: None
-        A boolean value that determines whether the average correlations be 
-        recomputed at each step
-    -----------------------------------------------------------------------------
-    Returns:
-    --------
-    list of column names
-    -----------------------------------------------------------------------------
-    Example:
-    --------
-    R1 = pd.DataFrame({
-        'x1': [1.0, 0.86, 0.56, 0.32, 0.85],
-        'x2': [0.86, 1.0, 0.01, 0.74, 0.32],
-        'x3': [0.56, 0.01, 1.0, 0.65, 0.91],
-        'x4': [0.32, 0.74, 0.65, 1.0, 0.36],
-        'x5': [0.85, 0.32, 0.91, 0.36, 1.0]
-    }, index=['x1', 'x2', 'x3', 'x4', 'x5'])
-
-    findCorrelation(R1, cutoff=0.6, exact=False)  # ['x4', 'x5', 'x1', 'x3']
-    findCorrelation(R1, cutoff=0.6, exact=True)   # ['x1', 'x5', 'x4'] 
-    """
-
-    def _findCorrelation_fast(corr, avg, cutoff):
-        combsAboveCutoff = corr.where(lambda x: (np.tril(x) == 0) & (x > cutoff)).stack().index
-        rowsToCheck = combsAboveCutoff.get_level_values(0)
-        colsToCheck = combsAboveCutoff.get_level_values(1)
-        msk = avg[colsToCheck] > avg[rowsToCheck].values
-        deletecol = pd.unique(np.r_[colsToCheck[msk], rowsToCheck[~msk]]).tolist()
-        return deletecol
-
-    def _findCorrelation_exact(corr, avg, cutoff):
-        x = corr.loc[(*[avg.sort_values(ascending=False).index]*2,)]
-
-        # Add type safety for integer-only DataFrames
+        # converts integer data to float type for safety in calculations
         if (x.dtypes.values[:, None] == ['int64', 'int32', 'int16', 'int8']).any():
             x = x.astype(float)
 
-        x.values[(*[np.arange(len(x))]*2,)] = np.nan
+        x.values[(*[np.arange(len(x))]*2,)] = np.nan # sets the self-correlations to NaN to ignore them
 
-        deletecol = []
-        for ix, i in enumerate(x.columns[:-1]):
-            for j in x.columns[ix+1:]:
-                if x.loc[i, j] > cutoff:
-                    if x[i].mean() > x[j].mean():
+        deletecol = [] # Creates an empty list to store names of columns to remove
+        for ix, i in enumerate(x.columns[:-1]): # Loops through each column except the last
+            for j in x.columns[ix+1:]: # compares each column with every column that comes after it
+                if x.loc[i, j] > cutoff: # checks if two columns have a correlation above the cutoff
+                    if x[i].mean() > x[j].mean(): # compares which column is more correlated on average
                         deletecol.append(i)
-                        x.loc[i] = x[i] = np.nan
-                    else:
+                        x.loc[i] = x[i] = np.nan # marks column i for deletion and ignores it for future comparisons
+                    else: # else marks column j for deletion and ignores it
                         deletecol.append(j)
                         x.loc[j] = x[j] = np.nan
-        return deletecol
+        return deletecol # returns the list of column names to remove
 
-    # Ensure correlation matrix is symmetric
+    # checks if correlation matrix is symmetric; otherwise raise error 
     if not np.allclose(corr, corr.T) or any(corr.columns != corr.index):
         raise ValueError("correlation matrix is not symmetric.")
 
-    acorr = corr.abs()
-    avg = acorr.mean()
+    acorr = corr.abs() # converts all correlation values to positive (absolute) form
+    avg = acorr.mean() # calculates the average correlation for each column
 
     # Choose method based on matrix size and exact flag
     if exact or exact is None and corr.shape[1] < 100:
@@ -168,9 +124,6 @@ def findCorrelation(corr, cutoff=0.9, exact=None):
         return _findCorrelation_fast(acorr, avg, cutoff)
 
 
-# ---------------------------------------------------------------------------
-# Apply correlation filter and clean the DataFrame
-# ---------------------------------------------------------------------------
 high_corr_cols = findCorrelation(corr_clean, cutoff=0.9)
 print("\nHighly correlated columns to remove:", high_corr_cols)
 
@@ -185,11 +138,10 @@ print(df_final.head())
 
 from factor_analyzer import FactorAnalyzer
 
-# remove columns that are constant (zero variance)
-df_final = df_final.loc[:, df_final.std() > 0]
+df_final = df_final.loc[:, df_final.std() > 0] # remove columns that are constant (zero variance)
 
-# remove any rows with NaN or infinite values
-df_final = df_final.replace([np.inf, -np.inf], np.nan).dropna()
+
+df_final = df_final.replace([np.inf, -np.inf], np.nan).dropna() # remove any rows with NaN or infinite values
 
 print("\nAfter final cleaning for Factor Analysis:")
 print(df_final.shape)
@@ -211,3 +163,5 @@ variance_df = pd.DataFrame(fa.get_factor_variance(), columns=factor_names, index
 
 loadings_df.to_csv('/Users/sanyuktasingh/Desktop/data class/week8/WASH_Loadings')
 variance_df.to_csv('/Users/sanyuktasingh/Desktop/data class/week8/WASH_Variance')
+
+# the factor analysis groups together responses (instead of individual Qs) that explain the patterns in the data; access and infrastructure conditions explains the largest share of variation 
