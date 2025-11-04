@@ -1,0 +1,10 @@
+from openpyxl import load_workbook
+
+sbti_excel_path = ('/Users/sanyuktasingh/Desktop/data class/SBTI Targets by Company (1).xlsx')
+
+workbook = load_workbook(sbti_excel_path)
+sheet = workbook['Data'] # Excel workbook can have multiple sheets; load_workbook returns a hashable object that we can directly index by the sheet name
+
+near_term = [cell.value for cell in sheet['K']
+            if isinstance(cell.value, (int, float, complex))]
+print(near_term)
