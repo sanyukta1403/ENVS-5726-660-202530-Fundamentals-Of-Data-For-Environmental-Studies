@@ -10,7 +10,6 @@ pipe_materials_table = workbook['Survival Probabilities']
 def weibull_survival(x, a, b, c):
     return c * np.exp(-((x / a) ** b)) #Returns the Weibull survival value for input x and parameters a (scale), b (shape), c (scale factor to match % scale). Mathematically: 𝑆(𝑥)=𝑐⋅𝑒−(𝑥/𝑎)𝑏S(x)=c⋅e−(x/a)b
 
-
 def plot_cdf_curve_fit(table, material_type: str, line_color: str):
     x_train = [] #life expectancy (x)
     y_train = [] #survival probability (%)
@@ -48,13 +47,13 @@ def plot_cdf_curve_fit(table, material_type: str, line_color: str):
     return float(a), float(b), float(c)
 
 
-# ---- Plot all materials ----
+# Plot all materials
 plot_cdf_curve_fit(pipe_materials_table, 'Cast Iron', 'red')
 plot_cdf_curve_fit(pipe_materials_table, 'Ductile Iron', 'blue')
 plot_cdf_curve_fit(pipe_materials_table, 'Galvanized Iron', 'green')
 plot_cdf_curve_fit(pipe_materials_table, 'Copper', 'brown')
 
-# Add a single legend manually
+# Add a single legend 
 plt.legend(['Cast Iron', 'Ductile Iron', 'Galvanized Iron', 'Copper'])
 plt.xlabel('Life Expectancy (y)')
 plt.ylabel('Survival Probability (%)')
