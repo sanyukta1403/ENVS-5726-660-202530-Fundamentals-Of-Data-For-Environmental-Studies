@@ -1,0 +1,62 @@
+from openpyxl import load_workbook
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import curve_fit
+
+pipe_material_excel_path = '/Users/sanyuktasingh/Desktop/data class/week9/Pipe Material Training Data.xlsx'
+workbook = load_workbook(pipe_material_excel_path)
+pipe_materials_table = workbook['Survival Probabilities']
+
+def weibull_survival(x, a, b, c):
+    return c * np.exp(-((x / a) ** b)) #Returns the Weibull survival value for input x and parameters a (scale), b (shape), c (scale factor to match % scale). Mathematically: 𝑆(𝑥)=𝑐⋅𝑒−(𝑥/𝑎)𝑏S(x)=c⋅e−(x/a)b
+
+
+def plot_cdf_curve_fit(table, material_type: str, line_color: str):
+    x_train = [] #life expectancy (x)
+    y_train = [] #survival probability (%)
+
+    # Assuming columns: [0] Material Type, [1] Life Expectancy (y), [2] Surv. Prob. (%)
+    for row in table.iter_rows(values_only=True):
+        if row[0] == "Material Type":
+            continue
+        if row[0] == material_type:
+            x_train.append(float(row[1]))
+            y_train.append(float(row[2]))  # keep in % scale (0–100)
+
+    X = np.array(x_train)
+    Y = np.array(y_train)
+
+    # Fit Weibull survival curve
+    popt, _ = curve_fit(
+        weibull_survival, X, Y,
+        p0=[50, 2, 100],  # starting guesses for (a, b, c)
+        maxfev=10000
+    )
+    a, b, c = popt
+
+    # Generate smooth survival curve (extended to ~140 years)
+    x_fit = np.linspace(0, 140, 300)
+    y_fit = weibull_survival(x_fit, a, b, c)
+
+    plt.plot(x_fit, y_fit, color=line_color, label=material_type)
+
+
+    # Plot curve
+    plt.plot(x_fit, y_fit, color=line_color, label=material_type)
+
+    # Return coefficients
+    return float(a), float(b), float(c)
+
+
+# ---- Plot all materials ----
+plot_cdf_curve_fit(pipe_materials_table, 'Cast Iron', 'red')
+plot_cdf_curve_fit(pipe_materials_table, 'Ductile Iron', 'blue')
+plot_cdf_curve_fit(pipe_materials_table, 'Galvanized Iron', 'green')
+plot_cdf_curve_fit(pipe_materials_table, 'Copper', 'brown')
+
+# Add a single legend manually
+plt.legend(['Cast Iron', 'Ductile Iron', 'Galvanized Iron', 'Copper'])
+plt.xlabel('Life Expectancy (y)')
+plt.ylabel('Survival Probability (%)')
+plt.title('Pipe Material Survival CDF')
+plt.show()
