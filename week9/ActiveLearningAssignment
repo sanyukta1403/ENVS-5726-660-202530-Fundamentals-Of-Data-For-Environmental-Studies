@@ -1,3 +1,5 @@
+# TASK 1 
+
 from openpyxl import load_workbook
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,19 +12,19 @@ pipe_materials_table = workbook['Survival Probabilities']
 def weibull_survival(x, a, b, c):
     return c * np.exp(-((x / a) ** b)) #Returns the Weibull survival value for input x and parameters a (scale), b (shape), c (scale factor to match % scale). Mathematically: 𝑆(𝑥)=𝑐⋅𝑒−(𝑥/𝑎)𝑏S(x)=c⋅e−(x/a)b
 
-def plot_cdf_curve_fit(table, material_type: str, line_color: str):
-    x_train = [] #life expectancy (x)
+def plot_cdf_curve_fit(table, material_type: str, line_color: str): # function takes an excel sheet object table, a material_type string to filter rows for that material, and a line_color string to color the plot
+    x_train = [] #life expectancy (x)å
     y_train = [] #survival probability (%)
 
-    # Assuming columns: [0] Material Type, [1] Life Expectancy (y), [2] Surv. Prob. (%)
-    for row in table.iter_rows(values_only=True):
-        if row[0] == "Material Type":
-            continue
-        if row[0] == material_type:
-            x_train.append(float(row[1]))
-            y_train.append(float(row[2]))  # keep in % scale (0–100)
+    # expected columns: [0] Material Type, [1] Life Expectancy (y), [2] Surv. Prob. (%)
+    for row in table.iter_rows(values_only=True): #loops over each row in the excel table; row is a tuple of cell values rather than cell objects
+        if row[0] == "Material Type": #skip header 
+            continue #move to next row 
+        if row[0] == material_type: #checks whether the current row’s material (first column) matches the material_type passed to the function
+            x_train.append(float(row[1])) #append the life expectancy
+            y_train.append(float(row[2])) #append survival probability
 
-    X = np.array(x_train)
+    X = np.array(x_train) #convert the Python lists into NumPy arrays
     Y = np.array(y_train)
 
     # Fit Weibull survival curve
@@ -59,3 +61,99 @@ plt.xlabel('Life Expectancy (y)')
 plt.ylabel('Survival Probability (%)')
 plt.title('Pipe Material Survival CDF')
 plt.show()
+
+
+
+
+# TASK 2 
+from collections import namedtuple
+from datetime import datetime
+import math
+import csv
+
+# Weibull survival function
+def weibull_survival(x, a, b, c):
+    return c * math.exp(-((x / a) ** b))
+
+# Coefficients from Task 1
+coefficients = {
+    "Cast Iron": (60.53, 3.02, 100),
+    "Ductile Iron": (50.15, 2.79, 100),
+    "Galvanized Iron": (40.21, 2.38, 100),
+    "Copper": (55.12, 2.55, 100)
+}
+
+# Create namedtuple
+WaterMain = namedtuple(
+    "WaterMain",
+    ["MainType", "Diameter", "InstallDate", "Material", "Age", "Survival_Probability"]
+)
+
+water_mains_table = []
+
+csv_path = ('/Users/sanyuktasingh/Desktop/data class/week9/Week 09 Water Mains csv.csv')
+
+# Read CSV (Excel-exported, so Windows-1252 encoding)
+with open(csv_path, newline='', encoding='windows-1252') as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    current_year = 2025  # fixed year for reproducibility
+
+    for row in reader:
+        install_date = datetime.strptime(row["InstallDate"], "%m/%d/%Y %H:%M") #parse the InstallDate string from the CSV into a datetime object
+        material = row["Material"]
+
+        # Calculate age
+        age = current_year - install_date.year
+
+        # Calculate survival probability
+        if material in coefficients:
+            a, b, c = coefficients[material]
+            survival = weibull_survival(age, a, b, c)
+        else:
+            survival = None
+
+        # Create WaterMain record
+        wm = WaterMain(
+            MainType=row["MainType"],
+            Diameter=row["Diameter"],
+            InstallDate=install_date,
+            Material=material,
+            Age=age,
+            Survival_Probability=round(survival, 3) if survival else None
+        )
+
+        water_mains_table.append(wm)
+
+for row in water_mains_table[:5]:
+    print(row)
+
+
+# TASK 3 
+
+import matplotlib.pyplot as plt
+
+# Extract survival probabilities from Task 2 table
+survival_values = [
+    row.Survival_Probability for row in water_mains_table
+    if row.Survival_Probability is not None
+]
+
+# Plot histogram of survival probabilities
+plt.figure(figsize=(8,5))
+plt.hist(survival_values, bins=15, color='skyblue', edgecolor='black')
+plt.axvline(70, color='red', linestyle='--', label='70% threshold')
+
+plt.title('Distribution of Pipe Survival Probabilities – Mercator Water')
+plt.xlabel('Survival Probability (%)')
+plt.ylabel('Number of Pipes')
+plt.legend()
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+
+print(f"Pipes below 70% survival: {len(low_survival)} "
+      f"({percent_low:.1f}% of total)")
+
+""""
+Mercator Water is not immediately vulnerable; most pipes have high survival probabilities. The utility can likely continue operations with targeted maintenance rather than a full system replacement.
+"""
