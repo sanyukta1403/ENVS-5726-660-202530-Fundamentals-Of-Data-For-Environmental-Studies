@@ -1,0 +1,73 @@
+import argparse
+import sys
+import pyodbc
+import matplotlib.pyplot as plt
+
+def execute_cursor(conn, sql_query: str)-> tuple:
+    print(f"Executing query: {sql_query}")
+    cursor = conn.cursor()
+    cursor.execute(sql_query)
+    if "SELECT" in sql_query.upper():
+        rows = cursor.fetchall()
+        headers = [column[0] for column in cursor.description]
+        cursor.close()
+        return headers, rows
+    else:
+        cursor.commit()
+        cursor.close()
+        return None, None
+def main(category_column: str):
+
+   
+    conn_str = (
+        "DRIVER={PostgreSQL Unicode(x64)};"
+        "SERVER=localhost;"
+        "PORT=5432;"
+        "DATABASE=week_11_database;"
+        "UID=postgres;"
+        "PWD=data;"
+    )
+
+    conn = pyodbc.connect(conn_str)
+
+    # Build SQL dynamically from user argument
+ 
+    group_sql = (
+        f"SELECT {category_column}, "
+        f"AVG(mean_ghg_1990_to_2020::float) "
+        f"FROM epa_ghg "
+        f"GROUP BY {category_column};"
+    )
+
+    headers, rows = execute_cursor(conn, sql_query=group_sql)
+
+    # Extract data for plotting
+    categories = [row[0] for row in rows]
+    avg_values = [float(row[1]) for row in rows]
+
+    
+    plt.figure(figsize=(10, 6))
+    plt.bar(categories, avg_values, color='skyblue')
+    plt.xlabel(category_column)
+    plt.ylabel("Average GHG (1990–2020)")
+    plt.title(f"Average GHG (1990–2020) by {category_column}")
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+
+    plt.show()
+
+    return
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'category_name',
+        type=str,
+        help="Category column to group by (e.g., sector, subsector, state)"
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    sys.exit(main(category_column=args.category_name))

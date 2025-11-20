@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
 
-pipe_material_excel_path = '/Users/sanyuktasingh/Desktop/data class/week9/Pipe Material Training Data.xlsx'
+pipe_material_excel_path = ('/Users/sanyuktasingh/Desktop/data class/week9/Pipe Material Training Data.xlsx')
 workbook = load_workbook(pipe_material_excel_path)
 pipe_materials_table = workbook['Survival Probabilities']
 
