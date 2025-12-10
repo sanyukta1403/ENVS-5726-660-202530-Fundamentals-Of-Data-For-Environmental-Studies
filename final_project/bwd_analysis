@@ -34,3 +34,135 @@ g.fig.suptitle(title, fontsize=14)
 g.fig.subplots_adjust(top=0.88)
 
 plt.show()
+
+#heatmap 
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_theme(style="whitegrid")
+
+# Load data
+df = pd.read_csv('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/joined_vietnam_waterrisk_cleaned.csv', encoding="utf-8")
+
+# Normalize factory type text
+df["Factory Type"] = df["Factory Type"].str.strip().str.upper()
+
+# Keep only the 3 relevant types
+df = df[df["Factory Type"].isin([
+    "FINISHED GOODS",
+    "FINISHED GOODS - COMPONENTS",
+    "MATERIALS"
+])]
+
+# Pivot: factory type as rows, risk metrics as columns (mean values)
+heatmap_data = df.groupby("Factory Type")[["bws_score", "bwd_score", "drr_score", "cfr_score"]].mean()
+
+# Draw heatmap (just like seaborn example)
+f, ax = plt.subplots(figsize=(7, 5))
+sns.heatmap(
+    heatmap_data,
+    annot=True, fmt=".2f",
+    linewidths=.5, cmap="coolwarm",
+    ax=ax
+)
+
+# Formatting
+ax.set_xlabel("Water Risk Metric")
+ax.set_ylabel("Factory Type")
+
+plt.title("Average Water Risk Scores by Factory Type – Nike Vietnam Supply Chain", y=1.05)
+plt.tight_layout()
+plt.show()
+
+#pairplot scatter mix 
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.set_theme(style="ticks")
+
+# Load data
+df = pd.read_csv('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/joined_vietnam_waterrisk_cleaned.csv', encoding="utf-8")
+
+# Clean & filter
+df["Factory Type"] = df["Factory Type"].str.strip().str.upper()
+df = df[df["Factory Type"].isin([
+    "FINISHED GOODS",
+    "FINISHED GOODS - COMPONENTS",
+    "MATERIALS"
+])]
+
+# Select only the metrics we want to visualize
+metrics = ["bws_score", "bwd_score", "drr_score", "cfr_score"]
+
+# Create pairplot
+g = sns.pairplot(
+    df[metrics + ["Factory Type"]],
+    hue="Factory Type",
+    diag_kind="kde",
+    corner=True,       # only lower triangle = cleaner
+    palette="dark"
+)
+
+# Improve spacing + title
+g.fig.suptitle("Relationships Between Water Risk Metrics – Nike Vietnam Supply Chain", y=1.02)
+plt.show()
+
+# geospatial map
+
+import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import contextily as cx
+
+sns.set_theme(style="whitegrid")
+
+# Load data
+df = pd.read_csv('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/joined_vietnam_waterrisk_cleaned.csv', encoding="utf-8")
+
+# Clean + drop NA
+df["Factory Type"] = df["Factory Type"].str.strip().str.upper()
+df = df.dropna(subset=["latitude", "longitude"])
+
+# Convert to GeoDataFrame
+gdf = gpd.GeoDataFrame(
+    df,
+    geometry=gpd.points_from_xy(df["longitude"], df["latitude"]),
+    crs="EPSG:4326"
+).to_crs(epsg=3857)
+
+# --- Plot ---
+fig, ax = plt.subplots(figsize=(8, 10))
+
+# Bubble map
+gdf.plot(
+    ax=ax,
+    markersize=gdf["bws_score"] * 100,
+    column="bws_score",
+    cmap="RdYlBu_r",
+    alpha=0.85,
+    legend=False
+)
+
+# Basemap
+cx.add_basemap(ax, source=cx.providers.OpenStreetMap.Mapnik)
+
+# Title + labels
+ax.set_title("Baseline Water Stress (BWS)\nFactory Locations – Nike Vietnam Supply Chain", fontsize=14)
+ax.set_xlabel("Longitude")
+ax.set_ylabel("Latitude")
+
+# Colorbar for BWS
+sm = plt.cm.ScalarMappable(
+    cmap="RdYlBu_r",
+    norm=plt.Normalize(vmin=gdf["bws_score"].min(), vmax=gdf["bws_score"].max())
+)
+sm._A = []
+cbar = fig.colorbar(sm, ax=ax, fraction=0.03, pad=0.02)
+cbar.set_label("Baseline Water Stress (Score)")
+
+plt.tight_layout()
+plt.show()
