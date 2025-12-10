@@ -31,37 +31,3 @@ g.fig.suptitle(title, fontsize=14)
 g.fig.subplots_adjust(top=0.88)
 
 plt.show()
-
-#graph with all 3 columns 
-
-sns.set_theme(style="whitegrid")
-
-df = pd.read_csv('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/joined_vietnam_waterrisk_cleaned.csv', encoding="utf-8")
-
-# Normalize formatting
-df["Factory Type"] = df["Factory Type"].str.strip().str.upper()
-
-# Only keep the 3 categories we want
-df = df[df["Factory Type"].isin([
-    "FINISHED GOODS",
-    "FINISHED GOODS - COMPONENTS",
-    "MATERIALS"
-])]
-
-# Plot with hue to separate the 3 bars by color
-g = sns.catplot(
-    data=df, kind="bar",
-    x="Factory Type", y="bws_score", hue="Factory Type",
-    errorbar="sd", palette="dark", alpha=.6, height=6
-)
-
-g.despine(left=True)
-g.set_axis_labels("", "Baseline Water Stress (Score)")
-g.set_xticklabels(rotation=15)  # Rotate labels for readability
-
-# Two-line chart title
-title = "Baseline Water Stress (BWS)\nFinished Goods vs Components vs Materials – Nike Vietnam Supply Chain"
-g.fig.suptitle(title, fontsize=14)
-g.fig.subplots_adjust(top=0.88)
-
-plt.show()

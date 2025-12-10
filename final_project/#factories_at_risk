@@ -1,0 +1,47 @@
+from pathlib import Path
+import csv
+
+nike_factory_path = Path('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/joined_vietnam_waterrisk_cleaned.csv')
+nike_factory_table = []
+
+with open(nike_factory_path, 'r', encoding='utf-8') as nike_file:
+    reader = csv.reader(nike_file)
+    nike_headers = next(reader) 
+
+    for row in reader:
+        nike_factory_table.append(row)
+
+#index label columns in header row
+bws_label_index = nike_headers.index("bws_label")
+bwd_label_index = nike_headers.index("bwd_label")
+cfr_label_index = nike_headers.index("cfr_label")
+drr_label_index = nike_headers.index("drr_label")
+
+#start count at 0 so we can later add 1 everytime matching row is found
+bws_high = 0
+bwd_medium_high = 0
+cfr_high = 0
+drr_medium_high = 0
+
+for row in nike_factory_table:
+    bws_label = row[bws_label_index].strip() #strip whitespace
+    bwd_label = row[bwd_label_index].strip()
+    cfr_label = row[cfr_label_index].strip()
+    drr_label = row[drr_label_index].strip()
+
+    # count if label starts with "High"/ "Extremely High"/ "Medium"
+    if bws_label.startswith("High") or bws_label.startswith("Extremely High"):
+        bws_high += 1
+    if bwd_label.startswith("Medium - High"):
+        bwd_medium_high += 1
+    if cfr_label.startswith("High") or cfr_label.startswith("Extremely High"):
+        cfr_high += 1
+    if drr_label.startswith("Medium - High"):
+        drr_medium_high += 1
+
+total = len(nike_factory_table)
+
+print(f'There are {bws_high} factories that are at extremely high or high water risk out of a total of {total} factories')
+print(f'There are {bwd_medium_high} factories that are at high or medium water depletion risk out of a total of {total} factories')
+print(f'There are {cfr_high} factories that are at extremely high or high coastal flooring risk out of a total of {total} factories')
+print(f'There are {drr_medium_high} factories that are at high or medium drought risk out of a total of {total} factories')
