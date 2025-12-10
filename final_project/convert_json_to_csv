@@ -1,0 +1,25 @@
+import json
+import csv
+#This downloaded dataset was a json file but the Aqueduct tool does not accept that format so we ran the following code to convert the json to a csv 
+
+# Load your JSON file
+with open('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/Nike Sustainability Map.json', "r") as file:
+    data = json.load(file)
+
+# Extract list inside "Data As Of SEP 2025"
+records = data["Data As Of SEP 2025"]
+
+# Create CSV
+with open("aqueduct_locations.csv", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["id", "location name", "latitude (decimal degrees)", "longitude (decimal degrees)"])
+    
+    for i, entry in enumerate(records, start=1):
+        writer.writerow([
+            i,
+            entry.get("name", ""),     # or entry.get("city")
+            entry.get("lat", ""),
+            entry.get("lon", "")
+        ])
+
+print("Done! File saved as aqueduct_locations.csv")

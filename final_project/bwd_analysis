@@ -1,0 +1,36 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.set_theme(style="whitegrid")
+
+df = pd.read_csv('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/joined_vietnam_waterrisk_cleaned.csv', encoding="utf-8")
+
+# --- DATA PROCESSING (df) ---
+df["Factory Type"] = df["Factory Type"].str.strip().str.upper()
+
+df = df[df["Factory Type"].isin([
+    "FINISHED GOODS",
+    "FINISHED GOODS - COMPONENTS",
+    "MATERIALS"
+])]
+
+# --- VISUALIZATION (g) ---
+g = sns.catplot(
+    data=df, kind="bar",
+    x="Factory Type", y="bwd_score", hue="Factory Type",
+    errorbar="sd", palette="dark", alpha=.6, height=6
+)
+
+g.despine(left=True)
+g.set_axis_labels("", "Baseline Water Depletion (Score)")
+g.set_xticklabels(rotation=15)
+
+# Title (2-line format for clarity)
+title = "Baseline Water Depletion (BWD)\nFinished Goods vs Components vs Materials – Nike Vietnam Supply Chain"
+g.fig.suptitle(title, fontsize=14)
+
+# Make room for title above axes
+g.fig.subplots_adjust(top=0.88)
+
+plt.show()

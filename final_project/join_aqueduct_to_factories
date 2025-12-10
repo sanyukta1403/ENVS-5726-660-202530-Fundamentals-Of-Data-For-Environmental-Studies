@@ -1,0 +1,76 @@
+from pathlib import Path
+import csv
+
+#nike file 
+nike_path = Path('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/Nike_factory_locations_vietnam.csv')
+nike_table = []
+
+with open(nike_path, 'r', encoding='utf-8') as nike_file:
+    reader = csv.reader(nike_file)
+    nike_headers = next(reader)
+
+    nike_headers = [h.strip().lstrip('\ufeff') for h in nike_headers] #cleans every header in the list by removing extra spaces and the hidden UTF-8 BOM character so column names match correctly when joining the tables
+
+    for row in reader:
+        nike_table.append(row)
+
+#aqueduct file 
+aqueduct_path = Path('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/Aqueduct_Water_Risk_Current_Vietnam.csv')
+aqueduct_table = []
+
+with open(aqueduct_path, 'r', encoding='utf-8') as aqueduct_file:
+    reader = csv.reader(aqueduct_file)
+    aqueduct_headers = next(reader)
+
+    aqueduct_headers = [h.strip().lstrip('\ufeff') for h in aqueduct_headers]
+
+    for row in reader:
+        aqueduct_table.append(row)
+
+# find id column indixes 
+
+nike_file_index = nike_headers.index('Factory Name') #finding index of the header
+aqueduct_file_index = aqueduct_headers.index('location_name')
+
+# build dictionaries because we first need unique IDs 
+nike_dict = {}
+for nike_row in nike_table:  #iterate every row in nike factory file 
+    unique_id = nike_row[nike_file_index] #using index to extract the ID from any row
+    nike_dict[unique_id] = nike_row #key is the unique ID and the value is the entire row
+
+aqueduct_dict = {}
+for aqueduct_row in aqueduct_table:
+    unique_id = aqueduct_row[aqueduct_file_index]
+    aqueduct_dict[unique_id] = aqueduct_row
+
+joined_headers = nike_headers + aqueduct_headers
+
+#left outer join
+
+outer_joined_table =[]
+
+for nike_row in nike_table: #nike table is the base dataset so every nike row should appear no matter what
+    unique_id = nike_row[nike_file_index]
+    if unique_id in aqueduct_dict: #test whether a aqueduct row exists with the same ID
+        aqueduct_row = aqueduct_dict[unique_id] #if yes extract those rows from aqueduct
+    else:
+        aqueduct_row = [None] * len(aqueduct_headers) #if not create None entries in the same length as headers so row in correct width
+    outer_joined_table.append(nike_row + aqueduct_row) #concatenate the lists into one row then append to table
+
+#  adding aqueduct rows (for full outer join) 
+
+nike_id_set = {row[nike_file_index] for row in nike_table} #loops over each row in nike table, finds the value in the first column, and pulls those values into a set of unique IDs
+    
+for unique_id in aqueduct_dict: #iterate over all IDs in aqueduct dict 
+    if unique_id not in nike_id_set: #if ID not in nike set, the row has no match
+
+        aqueduct_row = aqueduct_dict[unique_id] #look up the aqueduct data in dict that belongs to the unique id 
+
+        nike_row = [None] * len(nike_headers) #create row of None 
+        outer_joined_table.append(nike_row + aqueduct_row)
+
+
+output_path = Path('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/joined_vietnam_waterrisk.csv')
+with open(output_path, 'w', newline="", encoding='utf-8') as f:
+    writer = csv.writer(f)
+    writer.writerows([joined_headers] + outer_joined_table)
