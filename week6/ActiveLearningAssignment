@@ -90,7 +90,7 @@ total_rows = len(outer_joined_table)
 joined_social_index = social_id_index #same as original table; we index to the ID cause we are trying to find how many rows of that column are valid 
 joined_ej_screen_index = len(social_headers) + ej_screen_index #columns of hazards shift right so index changes so we count number of headers then add the hazards columns
 
-#to check validity the numbers have to be greater than 0
+#to check validity the numbers have to be greater than 0 
 
 social_valid = []
 ej_screen_valid = []

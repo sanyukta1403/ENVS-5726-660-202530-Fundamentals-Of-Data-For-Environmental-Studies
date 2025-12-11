@@ -41,7 +41,7 @@ for row in nike_factory_table:
 
 total = len(nike_factory_table)
 
-print(f'There are {bws_high} factories that are at extremely high or high water risk out of a total of {total} factories')
+print(f'There are {bws_high} factories that face extremely high or high water stress out of of a total of {total} factories')
 print(f'There are {bwd_medium_high} factories that are at high or medium water depletion risk out of a total of {total} factories')
 print(f'There are {cfr_high} factories that are at extremely high or high coastal flooring risk out of a total of {total} factories')
 print(f'There are {drr_medium_high} factories that are at high or medium drought risk out of a total of {total} factories')
