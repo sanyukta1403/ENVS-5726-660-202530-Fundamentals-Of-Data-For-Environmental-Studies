@@ -1,0 +1,118 @@
+import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import contextily as cx
+import matplotlib.colors as colors
+from shapely.geometry import Point
+
+sns.set_theme(style="white")
+
+# load dataset
+df = pd.read_csv(
+    '/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/Water Risk Categories All Countries.csv',
+    encoding="utf-8"
+)
+
+# Standardize country names
+df['name_0'] = df['name_0'].str.strip().str.upper()
+allowed = ["VIETNAM", "CHINA", "INDONESIA", "TAIWAN", "THAILAND"]
+df = df[df['name_0'].isin(allowed)]
+
+# Mean BWS per country
+country_avg = df.groupby("name_0", as_index=False)["bws_score"].mean()
+
+# Approx country centroids
+country_centers = {
+    "VIETNAM": (108.2772, 14.0583),
+    "CHINA": (104.1954, 35.8617),
+    "INDONESIA": (113.9213, -0.7893),
+    "TAIWAN": (120.9605, 23.6978),
+    "THAILAND": (100.9925, 15.8700)
+}
+
+# Attach coordinates
+country_avg["lon"] = country_avg["name_0"].map(lambda c: country_centers[c][0])
+country_avg["lat"] = country_avg["name_0"].map(lambda c: country_centers[c][1])
+
+
+# GEO DATAFRAME
+gdf = gpd.GeoDataFrame(
+    country_avg,
+    geometry=gpd.points_from_xy(country_avg['lon'], country_avg['lat']),
+    crs="EPSG:4326"
+).to_crs(epsg=3857)
+
+
+# MAP BOUNDS
+buffer = 600000
+minx, miny, maxx, maxy = gdf.total_bounds
+extent = (minx - buffer, maxx + buffer, miny - buffer, maxy + buffer)
+
+
+# FIGURE
+fig, ax = plt.subplots(figsize=(12, 12))
+
+# Force color scale to 0–5
+norm = colors.Normalize(vmin=0, vmax=5)
+
+# Bubble sizes
+bubble_sizes = gdf['bws_score'] * 1800
+
+points = ax.scatter(
+    gdf.geometry.x,
+    gdf.geometry.y,
+    s=bubble_sizes,
+    c=gdf["bws_score"],
+    cmap="RdYlBu_r",
+    norm=norm,
+    alpha=0.95,
+    edgecolor="black",
+    linewidth=1.1,
+    zorder=3
+)
+
+
+# LABELS WITH WHITE HALO (for readability)
+for _, row in gdf.iterrows():
+    ax.text(
+        row.geometry.x,
+        row.geometry.y + 150000,
+        row["name_0"].title(),
+        ha="center",
+        fontsize=13,
+        fontweight="bold",
+        color="black",
+        path_effects=[plt.matplotlib.patheffects.withStroke(linewidth=4, foreground="white")],
+        zorder=4
+    )
+
+
+# BASEMAP & COUNTRY BORDERS
+# Add OSM basemap
+cx.add_basemap(ax, source=cx.providers.CartoDB.Positron, zoom=4)
+
+
+# FINISHING TOUCHES
+ax.set_xlim(extent[0], extent[1])
+ax.set_ylim(extent[2], extent[3])
+
+ax.set_xticks([])
+ax.set_yticks([])
+
+# Title
+fig.suptitle(
+    "Average Baseline Water Stress (BWS)\nNike Manufacturing Hubs: Vietnam, China, Indonesia, Taiwan, Thailand",
+    fontsize=18,
+    fontweight="bold",
+    y=0.96
+)
+
+# Colorbar
+cbar = fig.colorbar(points, ax=ax, fraction=0.04, pad=0.01)
+cbar.set_label("BWS Score (0 = Low, 5 = Extremely High)", fontsize=12)
+
+# Tight layout
+plt.tight_layout(rect=[0, 0, 0.95, 0.95])
+
+plt.show()

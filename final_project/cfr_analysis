@@ -19,8 +19,10 @@ df = df[df["Category"].isin(["Finished Goods", "Materials"])]
 g = sns.catplot(
     data=df, kind="bar",
     x="Category", y="cfr_score", hue="Category",
-    errorbar="sd", palette="dark", alpha=.6, height=6
+    errorbar=None, palette="dark", alpha=.6, height=6
 )
+
+g.ax.set_ylim(0, 5) #make the y-axis go up to 5
 
 g.despine(left=True)
 g.set_axis_labels("", "Baseline Water Stress (Score)")

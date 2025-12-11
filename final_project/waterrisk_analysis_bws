@@ -33,6 +33,6 @@ g.set_axis_labels("", "Baseline Water Stress (Score)") #label axis
 
 title = "Baseline Water Stress (BWS)\nFinished Goods vs. Materials – Nike Vietnam Supply Chain" #title for chart; line 1 is metric name; line 2 is context
 g.fig.suptitle(title, fontsize=14) # .suptitle() places the title above the entire figure
-g.fig.subplots_adjust(top=0.88) #adjust spacing so title doesn’t overlap
+g.fig.subplots_adjust(top=0.88) #adjust spacing so title doesn’t overlap with plot
 
 plt.show()

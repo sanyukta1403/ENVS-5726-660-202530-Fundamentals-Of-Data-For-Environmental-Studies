@@ -1,26 +1,25 @@
 # geospatial map
 
-import pandas as pd
-import geopandas as gpd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import contextily as cx
+import pandas as pd #loads and manipulates csv data
+import geopandas as gpd #handles geospatial data (points, shapes, maps)
+import matplotlib.pyplot as plt #makes plots and figures
+import seaborn as sns #aesthetic defaults (not used for the map directly)
+import contextily as cx #adds basemap tiles (OpenStreetMap, satellite maps)
 
-sns.set_theme(style="whitegrid")
+sns.set_theme(style="whitegrid") #sets seaborn theme 
 
-# Load + clean
+#load dataset
 df = pd.read_csv('/Users/sanyuktasingh/Desktop/data class/ENVS-5726-660-202530-Fundamentals-Of-Data-For-Environmental-Studies/final_project/Water Risk Categories All Countries.csv', encoding="utf-8")
 
 # Standardize factory type formatting
-df['name_0'] = df["name_0"].str.strip().str.upper()
-allowed = ["VIETNAM", "CHINA", "INDONESIA", "TAIWAN", "THAILAND"]
+df['name_0'] = df["name_0"].str.strip().str.upper() #removes spaces and converts names to upper case
+allowed = ["VIETNAM", "CHINA", "INDONESIA", "TAIWAN", "THAILAND"] #filters dataset to factories in only those 5 countries
 df = df[df["name_0"].isin(allowed)]
 
 #calculate average
 country_avg = df.groupby("name_0", as_index=False)["bws_score"].mean()
 
-
-#create approc country center points 
+#create approx country center points to plot one bubble per country on the map
 country_centers = {
     "VIETNAM": (108.2772, 14.0583),
     "CHINA": (104.1954, 35.8617),
@@ -31,8 +30,6 @@ country_centers = {
 
 country_avg["lon"] = country_avg["name_0"].map(lambda c: country_centers[c][0])
 country_avg["lat"] = country_avg["name_0"].map(lambda c: country_centers[c][1])
-
-
 
 # Convert to GeoDataFrame
 gdf = gpd.GeoDataFrame(
@@ -76,14 +73,11 @@ for _, row in gdf.iterrows():
 # Add basemap AFTER plotting to avoid overlay issues
 cx.add_basemap(ax, source=cx.providers.OpenStreetMap.Mapnik)
 
-
 ax.set_xlim(extent[0], extent[1])
 ax.set_ylim(extent[2], extent[3])
 
-
 ax.set_xticks([])
 ax.set_yticks([])
-
 
 # Title centered with margin fixes
 fig.suptitle("Average Baseline Water Stress (BWS)\nFactory Locations – Nike Supply Chain in Top Manufacturing Countries",
@@ -92,9 +86,6 @@ fig.suptitle("Average Baseline Water Stress (BWS)\nFactory Locations – Nike Su
 # Colorbar placed cleanly to the right
 cbar = fig.colorbar(points, ax=ax, fraction=0.04, pad=0.01)
 cbar.set_label("Baseline Water Stress (Score)")
-
-# Save high-resolution export (optional)
-# fig.savefig("vietnam_bws_map.png", dpi=300, bbox_inches="tight")
 
 plt.tight_layout(rect=[0, 0, 0.90, 0.95])
 plt.show()

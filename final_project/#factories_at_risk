@@ -7,7 +7,6 @@ nike_factory_table = []
 with open(nike_factory_path, 'r', encoding='utf-8') as nike_file:
     reader = csv.reader(nike_file)
     nike_headers = next(reader) 
-
     for row in reader:
         nike_factory_table.append(row)
 
@@ -29,9 +28,9 @@ for row in nike_factory_table:
     cfr_label = row[cfr_label_index].strip()
     drr_label = row[drr_label_index].strip()
 
-    # count if label starts with "High"/ "Extremely High"/ "Medium"
+    # count if label starts with "High"/ "Extremely High"/ "Medium", if yes add 1
     if bws_label.startswith("High") or bws_label.startswith("Extremely High"):
-        bws_high += 1
+        bws_high += 1 
     if bwd_label.startswith("Medium - High"):
         bwd_medium_high += 1
     if cfr_label.startswith("High") or cfr_label.startswith("Extremely High"):
@@ -39,7 +38,7 @@ for row in nike_factory_table:
     if drr_label.startswith("Medium - High"):
         drr_medium_high += 1
 
-total = len(nike_factory_table)
+total = len(nike_factory_table) #count total number of factories (equivalent to total number of rows)
 
 print(f'There are {bws_high} factories that face extremely high or high water stress out of of a total of {total} factories')
 print(f'There are {bwd_medium_high} factories that are at high or medium water depletion risk out of a total of {total} factories')
